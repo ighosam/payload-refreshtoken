@@ -4,7 +4,7 @@ export interface PluginOptions {
     enabled?:boolean
 }
 
-  export const paylodRefreshToken = (options?:PluginOptions):Plugin =>{
+export const payloadRefreshToken = (options?:PluginOptions):Plugin =>{
    return (incomingConfig:Config)=>{
        
     return {
@@ -14,4 +14,5 @@ export interface PluginOptions {
     
    } 
 }
+
 
