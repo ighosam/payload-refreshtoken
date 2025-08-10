@@ -15,12 +15,14 @@ export const refreshTokenCollection:RefreshCollection = {
     fields:[
         {
             name: "tokenID",
-            type: "text"
+            type: "text",
+            required:true
         },
         {
             name: "user",
             type: "relationship",
-            relationTo:"users"
+            relationTo:"users",
+            required:true
         }
     ]
 
