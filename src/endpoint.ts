@@ -2,11 +2,9 @@ import {type Endpoint, type PayloadRequest } from "payload";
 import jwt from 'jsonwebtoken'
 import {parse as parseCookies } from 'cookie'
 
-//import { extractRefreshToken, extractAccessToken } from 'payload/auth'
-
 
 export const refreshEndpoint:Endpoint = {
-    path: "/refresh-token",
+    path: "/mytoken",
     method: "get",
     handler:  async(req:PayloadRequest)=>{
      
@@ -31,7 +29,7 @@ const {user} = req
 
  
 
-  if(!req.user) return Response.json({message:"this is crazy"},{status:401})
+  //if(!req.user) return Response.json({message:"this is crazy"},{status:401})
 
 //2 check database if token id exist and compare the tokenId
 
@@ -62,7 +60,7 @@ const userPrefsCookie = [
       status:200,
       headers:{
         'content-type':'application/json',
-        'set-cookies': [cookieValue,userPrefsCookie] as unknown as string // [cookieValue] if multiple cookies
+        'set-cookie': [cookieValue,userPrefsCookie] as unknown as string // [cookieValue] if multiple cookies
       }
     })
     }

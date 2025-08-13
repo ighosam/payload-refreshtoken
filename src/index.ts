@@ -1,7 +1,8 @@
-import type {Plugin,Config, PayloadRequest} from 'payload',
+import type {Plugin,Config, PayloadRequest} from 'payload'
 import {refreshTokenCollection} from './collections/refreshTokenCollection.js'
 import {refreshEndpoint} from './endpoint.js'
- interface PluginOptions {
+ 
+interface PluginOptions {
     enabled?:boolean
 }
 
