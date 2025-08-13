@@ -1,4 +1,4 @@
-import { generatePayloadCookie, type Endpoint, type PayloadRequest } from "payload";
+import {type Endpoint, type PayloadRequest } from "payload";
 import jwt from 'jsonwebtoken'
 import {parse as parseCookies } from 'cookie'
 
@@ -37,8 +37,34 @@ const {user} = req
 
 
 //3 generate refreshtoken.
+const cookieValue = [
+  `maytoken=asdfasdfsda`, // Key=Value
+  `Path=/`,              // Accessible across all paths
+  `SameSite=None`,       // Required for cross-site usage
+  `Secure`,              // Required with SameSite=None (HTTPS only)
+  `HttpOnly`,            // Recommended for security (blocks JS access)
+  `Max-Age=86400`,       // Expires in 1 day (in seconds)
+].join('; ');
 
-    return Response.json({message:"you got it"})
+const userPrefsCookie = [
+  `user_prefs=dark_mode%2Cnotifications`, // URL-encoded value
+  `Path=/`,
+  `SameSite=Strict`,    // Strict for sensitive actions
+  `Secure`,
+  `Max-Age=2592000`,    // Expires in 30 days
+  // Omitting HttpOnly to allow JS access (if needed)
+].join('; ');
+
+
+
+
+    return Response.json({message:"you got it"},{
+      status:200,
+      headers:{
+        'content-type':'application/json',
+        'set-cookies': [cookieValue,userPrefsCookie] as unknown as string // [cookieValue] if multiple cookies
+      }
+    })
     }
 
 
