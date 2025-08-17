@@ -1,7 +1,7 @@
-import type {Plugin,Config, PayloadRequest,CollectionConfig,TypedUser} from 'payload'
+import type {Plugin,Config, PayloadRequest,CollectionConfig,TypedUser, CollectionAfterLoginHook} from 'payload'
 import {refreshTokenCollection} from './collections/refreshTokenCollection.js'
 import {refreshEndpoint} from './endpoint.js'
-import { v4 as uuidv4 } from 'uuid'
+import {afterLogin} from './hooks/afterLogin.js'
  
 interface PluginOptions {
   enabled?:boolean
@@ -29,33 +29,33 @@ interface PluginOptions {
                         auth:{
                          //properly type the auth to CollectionConfig
                         ...(collection.auth || {} ) as CollectionConfig,
-                            tokenExpiration:360000              
-                        }
+                            tokenExpiration:360000,
+                            //auth:true,    
+                            ///
+                        },
+                               hooks:{
+                                ...(collection.hooks||{}),
+                                afterLogin:[
+                                    ...(collection.hooks?.afterLogin||[]),
+                                    afterLogin,
+                                       
+                                ],
+                            }
+
+                        /*
+                       hooks:{
+                        afterLogin:[
+                           ...(collection.hooks?.afterLogin||[])  
+                        ]
+                       }
+                        */
                     }
                 }
                 return collection
             }),
             refreshTokenCollection,       
         ],
-        hooks:{
-            ...(incomingConfig.hooks || {}),
-          afterLogin: [
-             async ({ req, user }:{req:PayloadRequest,user:TypedUser}) => {
-                
-                //generate refresh token
-                const tokenId = uuidv4()
-                const {payload} = req
-                //get the secrete from config or process.env
-                const secret = incomingConfig.secret
 
-                //update refresh token collection.
-
-                console.log("Secret is: ",secret)
-
-               return Response.json({message:`This is the message: ${secret}`})
-             }
-          ]
-        },
       
        endpoints:[
         ...(incomingConfig?.endpoints || []),
