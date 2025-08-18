@@ -14,7 +14,7 @@ export const refreshTokenCollection:RefreshCollection = {
       },
     fields:[
         {
-            name: "tokenID",
+            name: "tokenId",
             type: "text",
             required:true
         },
