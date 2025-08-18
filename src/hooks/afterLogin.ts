@@ -6,6 +6,7 @@ export const afterLogin:CollectionAfterLoginHook = async ({req,user})=>{
         try{
                 
                 //generate refresh token
+
                 const tokenId = uuidv4()
                 const {payload} = req
 
@@ -20,12 +21,17 @@ export const afterLogin:CollectionAfterLoginHook = async ({req,user})=>{
                         }
                     }
                 )
-                if(tokenId_exist) throw new Error("This user already logged in")
-
+/*
+                if(tokenId_exist) {
+                    console.log("the resault is : ",tokenId_exist)
+                    throw new Error("This user already logged in")
+                }
+                */
+               console.log("the resault is : ",tokenId_exist)
 
                     // Create refresh token document
                   await req.payload.create({
-                    collection: 'refresh-tokens',
+                    collection: 'refresh-token',
                     data: {
                       tokenId: tokenId,
                       user: user.id,
