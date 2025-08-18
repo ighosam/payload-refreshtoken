@@ -32,11 +32,6 @@ export const afterLogin:CollectionAfterLoginHook = async ({req,user})=>{
                     },
                   })
 
-
-        
-             
-
-
         }catch(error){
             console.log("Message: ",error)
         }

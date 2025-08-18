@@ -23,6 +23,9 @@ const data = req?.body
 //const cookies = (req as PayloadRequest &{cookies:Record<string,string>}).cookies
 const {user} = req
 
+const secret = process.env.PAYLOAD_SECRET
+
+console.log(secret)
 
 //const cookie = req.headers.getSetCookie()
 
@@ -52,9 +55,6 @@ const userPrefsCookie = [
   `Max-Age=2592000`,    // Expires in 30 days
   // Omitting HttpOnly to allow JS access (if needed)
 ].join('; ');
-
-
-
 
     return Response.json({message:"you got it"},{
       status:200,
