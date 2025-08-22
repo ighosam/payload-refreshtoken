@@ -1,8 +1,9 @@
 import type {TypedUser,PayloadRequest} from 'payload'
 import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
+import type { PluginOptions } from '../types.js'
 
-export const generateRefreshToken =(req:PayloadRequest)=>{
+export const generateRefreshToken =(req:PayloadRequest,options:PluginOptions)=>{
 
     try{
     //const secret = process.env.PAYLOAD_SECRET || 'fasfasfasf'
@@ -17,10 +18,13 @@ export const generateRefreshToken =(req:PayloadRequest)=>{
         id: req.user?.id  
     }
     const token = jwt.sign(refreshPayload,refreshSecret,{
-      expiresIn: '7d', // or '30d', '1y', etc
+      expiresIn: '1d', // or '30d', '1y', etc
     })
 
-    return token
+    return {
+        tokenId,
+        token
+    }
 
 }catch(error){
     console.log("Message: ",error)
@@ -30,20 +34,21 @@ export const generateRefreshToken =(req:PayloadRequest)=>{
 
 }
 
-export const generateAccessToken =(req:PayloadRequest)=>{
+export const generateAccessToken = async (req:PayloadRequest)=>{
     const secret = process.env.PAYLOAD_SECRET
+    const expiresIn = process.env.JWT_ACCESS_EXPIRATION || '1d'
 
     try{
+        if(!expiresIn) throw new Error("expiereIn not found, please set up JWT_ACCESS_EXPIRATION in .env file")
         if(!secret) throw new Error("no secret found,  Please set up PAYLOAD_SECRET in .env file")
-            
-      
+    
              const accessPayload = {
                  id:req.user?.id,
                  email:req.user?.email,
                  collection:'users'
               }
                const token = jwt.sign(accessPayload,secret,{
-                expiresIn: '7d', // or '30d', '1y', etc
+                expiresIn: '1d', // or '30d', '1y', etc
     })
 
        return token

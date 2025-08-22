@@ -1,15 +1,14 @@
 import type {Plugin,Config, PayloadRequest,CollectionConfig,TypedUser, CollectionAfterLoginHook} from 'payload'
 import {refreshTokenCollection} from './collections/refreshTokenCollection.js'
-import {refreshEndpoint} from './endpoint.js'
-import {afterLogin} from './hooks/afterLogin.js'
- 
-interface PluginOptions {
-  enabled?:boolean
-  tokenExpiration?: number; // Make expiration configurable
-  userCollectionSlug?: string; // Allow custom user collection slug
-}
+import {createRefreshEndpoint} from './createRefreshEndpoint.js'
+import {createAfterLogin} from './hooks/createAfterLogin.js'
+import type { PluginOptions } from './types.js'
 
- export const payloadRefreshToken = (options?:PluginOptions):Plugin =>{
+
+ export const payloadRefreshToken = (options:PluginOptions):Plugin =>{
+    const afterLogin = createAfterLogin(options)
+    const refreshEndpoint = createRefreshEndpoint(options)
+
    return (incomingConfig:Config)=>{
     const userSlug = options?.userCollectionSlug || 'users';
 
@@ -29,7 +28,7 @@ interface PluginOptions {
                         auth:{
                          //properly type the auth to CollectionConfig
                         ...(collection.auth || {} ) as CollectionConfig,
-                            tokenExpiration:360000,
+                            tokenExpiration:options?.accessTokenExpiration||3600
                             //auth:true,    
                             ///
                         },

@@ -1,6 +1,6 @@
 import type { Plugin, Config, PayloadRequest, Collection, CollectionConfig } from 'payload'
 import { refreshTokenCollection } from './collections/refreshTokenCollection.js'
-import { refreshEndpoint } from './endpoint.js'
+import { refreshEndpoint } from './createRefreshEndpoint.js'
 
 interface PluginOptions {
   enabled?: boolean

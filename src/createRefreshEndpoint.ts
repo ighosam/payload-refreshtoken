@@ -1,9 +1,11 @@
 import {type Endpoint, type PayloadRequest } from "payload";
 import jwt from 'jsonwebtoken'
 import {parse as parseCookies } from 'cookie'
+import type { PluginOptions } from './types.js'
 
+export const createRefreshEndpoint = (options:PluginOptions)=>{
 
-export const refreshEndpoint:Endpoint = {
+  const refreshEndpoint:Endpoint = {
     path: "/mytoken",
     method: "get",
     handler:  async(req:PayloadRequest)=>{
@@ -68,3 +70,7 @@ const userPrefsCookie = [
 
 
 }
+
+return refreshEndpoint
+}
+ 
