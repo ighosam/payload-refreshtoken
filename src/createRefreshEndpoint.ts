@@ -1,15 +1,34 @@
+
 import {type Endpoint, type PayloadRequest } from "payload";
 import jwt from 'jsonwebtoken'
 import {parse as parseCookies } from 'cookie'
 import type { PluginOptions } from './types.js'
+import {parseJsonBody} from './utilities/parseJsonBody.js'
+
+interface YourRequestBody {
+  // Define your request body structure
+  title: string;
+  content: string;
+  // ... other fields
+}
+
 
 export const createRefreshEndpoint = (options:PluginOptions)=>{
 
   const refreshEndpoint:Endpoint = {
     path: "/mytoken",
-    method: "get",
+    method: "post",
     handler:  async(req:PayloadRequest)=>{
-     
+
+      interface rtoken {
+        refreshToken?:string,
+      }
+
+      let body = await parseJsonBody(req) as rtoken
+
+      console.log("THIS IS THE RESULT: ",body.refreshToken)
+
+      const refreshToken = body.refreshToken
 
 const rawCookieHeader = req.headers.get('cookie')
 
@@ -30,7 +49,7 @@ const secret = process.env.PAYLOAD_SECRET
 console.log(secret)
 
 
-//const cookie = req.headers.getSetCookie()
+   //const cookie = req.headers.getSetCookie()
 
 
  
@@ -66,11 +85,22 @@ const userPrefsCookie = [
         'set-cookie': [cookieValue,userPrefsCookie] as unknown as string // [cookieValue] if multiple cookies
       }
     })
+
+
+
+
+/////////////////////////////
+
+
+    ///////////////////////
+    return Response.json({message: "asdfasdf"})
     }
 
 
-}
+  }
 
 return refreshEndpoint
 }
- 
+
+
+/////////////////////////////////////
