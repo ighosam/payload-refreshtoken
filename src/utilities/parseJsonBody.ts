@@ -1,39 +1,55 @@
-import type { PayloadRequest } from "payload";
+import { type PayloadRequest } from "payload";
 
-export const parseJsonBody = async <T>(req:PayloadRequest) =>{
-  try {
-    let body: T;
-    
-    // If body is a ReadableStream
-    if (req.body && typeof (req.body as any).getReader === 'function') {
-      const reader = (req.body as ReadableStream).getReader();
-      const chunks: Uint8Array[] = [];
-      
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        if (value) chunks.push(value);
-      }
-      
-      const combined = new Uint8Array(chunks.reduce((acc, chunk) => acc + chunk.length, 0));
-      let position = 0;
-      
-      for (const chunk of chunks) {
-        combined.set(chunk, position);
-        position += chunk.length;
-      }
-      
-      const text = new TextDecoder().decode(combined);
-    return  body = JSON.parse(text) as T ;
-    } else {
-      // Body is already parsed
-     return body = req.body as unknown as T ;
-    }
-    // Now use the parsed body with proper typing
-  } catch (error) {
-    console.error('Error:', error);
-   return Response.json({ error: (error as Error).message },{status:400});
+export class BodyParseError extends Error {
+  constructor(message: string, public readonly originalError?: unknown) {
+    super(message);
+    this.name = 'BodyParseError';
   }
-} 
- 
- 
+}
+
+export const parseJsonBody = async <T>(req: PayloadRequest): Promise<T> => {
+  try {
+    let rawBody: string | undefined;
+
+    // If body is already parsed object
+    if (req.body && typeof req.body === 'object' && !(req.body instanceof ReadableStream)) {
+      return req.body as unknown as T;
+    }
+
+    // Get raw text from various sources
+    if (typeof req.text === 'function') {
+      rawBody = await req.text();
+    } else if (req.body instanceof ReadableStream) {
+      const response = new Response(req.body);
+      rawBody = await response.text();
+    } else if (typeof req.body === 'string') {
+      rawBody = req.body;
+    }
+
+    if (!rawBody) {
+      throw new BodyParseError('No body content found');
+    }
+
+    return JSON.parse(rawBody) as T;
+    
+  } catch (error) {
+    if (error instanceof BodyParseError) {
+      throw error;
+    }
+    
+    throw new BodyParseError(
+      error instanceof Error ? error.message : 'Unknown error parsing JSON body',
+      error
+    );
+  }
+};
+
+// Usage example:
+// try {
+//   const data = await parseJsonBody<MyType>(req);
+// } catch (error) {
+//   if (error instanceof BodyParseError) {
+//     return Response.json({ error: error.message }, { status: 400 });
+//   }
+//   throw error;
+// }
