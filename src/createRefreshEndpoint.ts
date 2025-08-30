@@ -3,7 +3,7 @@ import {type Endpoint, type PayloadRequest } from "payload";
 import jwt from 'jsonwebtoken'
 import {parse as parseCookies } from 'cookie'
 import type { PluginOptions } from './types.js'
-import {parseJsonBody} from './utilities/parseJsonBody.js'
+import {BodyParseError, parseJsonBody} from './utilities/parseJsonBody.js'
 //import {parseJsonBody} from './utilities/generateTest.js'
 //import { parseJsonBody } from "./utilities/parseJsonBodyTest.js";
 interface YourRequestBody {
@@ -23,42 +23,51 @@ export const createRefreshEndpoint = (options:PluginOptions)=>{
 
       interface rtoken {
         refreshToken?:string,
-      }
+      } 
 
-      
-      
-      try{
-         const body = await parseJsonBody(req) as rtoken
-         console.log("THIS IS THE RESULT: ",body.refreshToken)
-         const refreshToken = body.refreshToken
+      const getBodyCookies = async (req:PayloadRequest)=>{
+             try{
+         const data = await parseJsonBody<rtoken>(req)
+         const refreshToken = data.refreshToken
+         return refreshToken
 
       }catch(error){
-     return Response.json({error: error }, { status: 400 });
+        if(error instanceof BodyParseError){
+          //return Response.json({error: error.message},{status:400})
+          return null
+        }
+        //throw error
+        null
       }
-      
 
-     
+      }
+
+
+const bodyToken = await getBodyCookies(req);
 
 const rawCookieHeader = req.headers.get('cookie')
-
 const cookies = parseCookies(rawCookieHeader || '')
+const token = cookies['refreshToken'] // or whatever cookie name you expect
 
-const token = cookies['payload-token'] // or whatever cookie name you expect
+const refToken = token ? token : bodyToken
 
 //Now you can verify or decode the JWT, or use it further
 
 //refresh token or read it from httponly cookie
 
-const data = req?.body
+//const data = req?.body
 //const cookies = (req as PayloadRequest &{cookies:Record<string,string>}).cookies
-const {user} = req
+//const {user} = req
 
 const secret = process.env.PAYLOAD_SECRET
 
-console.log(secret)
+//console.log(secret)
 
 
    //const cookie = req.headers.getSetCookie()
+
+
+   console.log("FINAL TOKEN IS: ",refToken)
 
 
  
@@ -99,11 +108,9 @@ const userPrefsCookie = [
 
 
 /////////////////////////////
+/////////////////////////
 
-
-    ///////////////////////
-    return Response.json({message: "asdfasdf"})
-    }
+ }
 
 
   }
