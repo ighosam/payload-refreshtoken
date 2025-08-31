@@ -47,9 +47,9 @@ const bodyToken = await getBodyCookies(req);
 
 const rawCookieHeader = req.headers.get('cookie')
 const cookies = parseCookies(rawCookieHeader || '')
-const token = cookies['refreshToken'] // or whatever cookie name you expect
+const headerToken = cookies['refreshToken'] // or whatever cookie name you expect
 
-const refToken = token ? token : bodyToken
+const refToken = headerToken ? headerToken : bodyToken
 
 //Now you can verify or decode the JWT, or use it further
 
