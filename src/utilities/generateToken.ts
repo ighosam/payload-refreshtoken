@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
 import type { PluginOptions } from '../types.js'
 
-export const generateRefreshToken =(req:PayloadRequest,options:PluginOptions)=>{
+export const generateRefreshToken =(req:PayloadRequest,options?:PluginOptions)=>{
 
     try{
     //const secret = process.env.PAYLOAD_SECRET || 'fasfasfasf'
