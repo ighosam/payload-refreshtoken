@@ -1,5 +1,8 @@
 import { type PayloadRequest } from "payload";
 
+//not realy needed since error will be returned instead null will be returned
+//BodyParseError is optional in this case.
+// regular Error is sufficient in this case.
 export class BodyParseError extends Error {
   constructor(message: string, public readonly originalError?: unknown) {
     super(message);
@@ -44,12 +47,3 @@ export const parseJsonBody = async <T>(req: PayloadRequest): Promise<T> => {
   }
 };
 
-// Usage example:
-// try {
-//   const data = await parseJsonBody<MyType>(req);
-// } catch (error) {
-//   if (error instanceof BodyParseError) {
-//     return Response.json({ error: error.message }, { status: 400 });
-//   }
-//   throw error;
-// }

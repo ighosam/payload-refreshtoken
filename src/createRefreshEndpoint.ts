@@ -4,8 +4,7 @@ import jwt from 'jsonwebtoken'
 import {parse as parseCookies } from 'cookie'
 import type { PluginOptions } from './types.js'
 import {BodyParseError, parseJsonBody} from './utilities/parseJsonBody.js'
-//import {parseJsonBody} from './utilities/generateTest.js'
-//import { parseJsonBody } from "./utilities/parseJsonBodyTest.js";
+
 interface YourRequestBody {
   // Define your request body structure
   title: string;
@@ -25,26 +24,26 @@ export const createRefreshEndpoint = (options:PluginOptions)=>{
         refreshToken?:string,
       } 
 
+      //function to get cookies from request body if it exist
       const getBodyCookies = async (req:PayloadRequest)=>{
              try{
          const data = await parseJsonBody<rtoken>(req)
          const refreshToken = data.refreshToken
          return refreshToken
-
+        //if there is an error getting cookies from request body, return null
       }catch(error){
         if(error instanceof BodyParseError){
           //return Response.json({error: error.message},{status:400})
           return null
         }
         //throw error
-        null
+        return null
       }
 
       }
 
 
 const bodyToken = await getBodyCookies(req);
-
 const rawCookieHeader = req.headers.get('cookie')
 const cookies = parseCookies(rawCookieHeader || '')
 const headerToken = cookies['refreshToken'] // or whatever cookie name you expect
