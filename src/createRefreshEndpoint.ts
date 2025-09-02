@@ -55,7 +55,6 @@ const refToken = headerToken ? headerToken : bodyToken
 
 const secret = process.env.PAYLOAD_SECRET
         if (!secret) {
-          console.error('PAYLOAD_SECRET environment variable is not set');
           return Response.json(
             { error: "Server configuration error" },
             { status: 500 }
@@ -69,7 +68,6 @@ const secret = process.env.PAYLOAD_SECRET
           decodedToken = jwt.verify(refToken, secret);
           
         } catch (error) {
-          console.log("THE REAL ERROR IS: ",error)
           return Response.json(
             { error: "Invalid or expired refresh token" },
             { status: 401 }
@@ -115,7 +113,7 @@ const secret = process.env.PAYLOAD_SECRET
 const refreshToken = await generateRefreshToken(req,options)
 const accessToken = await generateAccessToken(req,options)
 
-//generate refreshtoken.
+//set generated tokens to http only
 const cookieValue = [
   `refreshToken= ${refreshToken}`, // Key=Value
   `Path=/`,              // Accessible across all paths
@@ -136,8 +134,8 @@ const userPrefsCookie = [
 
     return Response.json(
       {
-        "payload-token":accessToken,
-        "refreshToken":refreshToken
+        "payload-token":accessToken, //return payload-token, optional
+        "refreshToken":refreshToken //return refreshToken, optional
       },{
       status:200,
       headers:{
@@ -145,9 +143,6 @@ const userPrefsCookie = [
         'set-cookie': [cookieValue,userPrefsCookie] as unknown as string // [cookieValue] if multiple cookies
       }
     })
-
-/////////////////////////////
-/////////////////////////
 
  }
 
@@ -157,5 +152,3 @@ const userPrefsCookie = [
 return refreshEndpoint
 }
 
-
-/////////////////////////////////////

@@ -57,7 +57,6 @@ export const generateRefreshToken = async (req:PayloadRequest,options?:PluginOpt
                     },
                   })
     }
-  console.log("TOKEN IS: ",token)
     return token 
 
 }catch(error){
@@ -67,7 +66,6 @@ export const generateRefreshToken = async (req:PayloadRequest,options?:PluginOpt
 }
 
 }
-
 export const generateAccessToken = async (req:PayloadRequest,options?:PluginOptions)=>{
     const secret = process.env.PAYLOAD_SECRET
     const expiresIn = process.env.JWT_ACCESS_EXPIRATION || options?.accessTokenExpiration
@@ -88,7 +86,7 @@ export const generateAccessToken = async (req:PayloadRequest,options?:PluginOpti
        return token
 
     }catch(error){
-       console.log("Message: ",error)
+       
     }
 
 
