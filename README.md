@@ -8,5 +8,18 @@ Step 1.
 ======
     Generate the tsconfig.json file using tsc --init 
     typescript must be installed on your system to use the command above.
+# Set JWT_ACCEESS_EXPIRATION AND JWT_REFRESH_EXPIRATION IN .env
+    JWT_ACCESS_EXPIRATION
+    JWT_REFRESH_EXPIRATION
+    variables in .env file in your main application and or
+
+    set plugin options in configuration file e.g:
+
+       payloadRefreshToken({
+      enabled:true,
+      refreshTokenExpiration:86400,
+      accessTokenExpiration:600
+    })
+
 
     
