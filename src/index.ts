@@ -4,7 +4,6 @@ import {createRefreshEndpoint} from './createRefreshEndpoint.js'
 import {createAfterLogin} from './hooks/createAfterLogin.js'
 import type { PluginOptions } from './types.js'
 
-
  export const payloadRefreshToken = (options:PluginOptions):Plugin =>{
     const afterLogin = createAfterLogin(options)
     const refreshEndpoint = createRefreshEndpoint(options)

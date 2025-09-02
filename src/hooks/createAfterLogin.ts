@@ -7,7 +7,8 @@ export const createAfterLogin = (options:PluginOptions):CollectionAfterLoginHook
 
   const afterLogin:CollectionAfterLoginHook = async ({req,user})=>{
   
-        try{  
+        try{ 
+          
        const token = await generateRefreshToken(req,options)
 
        if(!token) throw new Error("Can't generate refreshToken")
