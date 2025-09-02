@@ -8,37 +8,31 @@ export const createAfterLogin = (options:PluginOptions):CollectionAfterLoginHook
   const afterLogin:CollectionAfterLoginHook = async ({req,user})=>{
   
         try{  
-                //generate refresh token
+       const token = await generateRefreshToken(req,options)
 
-                const tokenId = uuidv4()
-                const {payload} = req
+       console.log("WE FOUND THE TOKEN: ",token)
 
-     //delete any previous token id for this user if it exist
-       const delete_tokenId =  await req.payload.delete({
-        collection:'refresh-token',
-        where:{
-         user: user.id
-        } 
-       })
-
-       const token = generateRefreshToken(req)
+       if(!token) throw new Error("Can't generate refreshToken")
 
        user = {
         ...user,
        refreshToken:token
        }
-
                   // Create refresh token document
+                  /*
                   await req.payload.create({
                     collection: 'refresh-token',
                     data: {
-                      tokenId: uuidv4(),
+                      tokenId: token?.tokenId,
                       user: user.id,
                     },
                   })
 
+                  */
+
         }catch(error){
             console.log("Message: ",error)
+            //return user to login again.
         }
 
                 

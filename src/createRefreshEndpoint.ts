@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import {parse as parseCookies } from 'cookie'
 import type { PluginOptions } from './types.js'
 import {BodyParseError, parseJsonBody} from './utilities/parseJsonBody.js'
+import {generateAccessToken,generateRefreshToken } from './utilities/generateToken.js'
 
 interface YourRequestBody {
   // Define your request body structure
@@ -11,10 +12,7 @@ interface YourRequestBody {
   content: string;
   // ... other fields
 }
-
-
 export const createRefreshEndpoint = (options:PluginOptions)=>{
-
   const refreshEndpoint:Endpoint = {
     path: "/mytoken",
     method: "post",
@@ -34,10 +32,10 @@ export const createRefreshEndpoint = (options:PluginOptions)=>{
       }catch(error){
         if(error instanceof BodyParseError){
           //return Response.json({error: error.message},{status:400})
-          return null
+          return undefined
         }
         //throw error
-        return null
+        return undefined
       }
 
       }
@@ -50,35 +48,76 @@ const headerToken = cookies['refreshToken'] // or whatever cookie name you expec
 
 const refToken = headerToken ? headerToken : bodyToken
 
-//Now you can verify or decode the JWT, or use it further
-
-//refresh token or read it from httponly cookie
-
-//const data = req?.body
-//const cookies = (req as PayloadRequest &{cookies:Record<string,string>}).cookies
-//const {user} = req
+//if refresh token is not available then returned an error message.
+ if(!refToken){
+    return Response.json({Message: "refreshToken is required"},{status:500})
+   }
 
 const secret = process.env.PAYLOAD_SECRET
+        if (!secret) {
+          console.error('PAYLOAD_SECRET environment variable is not set');
+          return Response.json(
+            { error: "Server configuration error" },
+            { status: 500 }
+          );
+        }
 
-//console.log(secret)
+       
+       
+        let decodedToken: any;
+        try {
+          decodedToken = jwt.verify(refToken, secret);
+          
+        } catch (error) {
+          console.log("THE REAL ERROR IS: ",error)
+          return Response.json(
+            { error: "Invalid or expired refresh token" },
+            { status: 401 }
+          );
+        }
+   //get tokenId, collection,id,iat and exp from decodedToken
+  const {tokenId,collection,id,iat,exp} = decodedToken
+  //get payload instance from req.
+  
 
+//check to see if this token is valid and can be found in refresh-token collection
+  const  payloadTokenId = await req.payload.find({
+    collection: 'refresh-token',
+    where:{
+      tokenId:{
+        equals: tokenId
+      }
+    }
+    })
 
-   //const cookie = req.headers.getSetCookie()
+    const foundToken = await payloadTokenId.docs[0]?.tokenId
+    
+ //if token id is not available in refresh-token collection, return an error.   
+      if (!foundToken) {
+        //invalid refresh token
+          return Response.json(
+            { error: "invalid refresh token" },
+            { status: 500 }
+          );
+        }
+  
+// check if token from refreshToken has expired.
+  // The 'exp' claim is a Unix timestamp (in seconds).
+    const currentTime = Date.now() / 1000; // Convert to seconds
 
+      if(exp < currentTime){
+        return Response.json({Message: "RefreshToken is expired"},{status:500})
+         //redirect users to login
+      }
 
-   console.log("FINAL TOKEN IS: ",refToken)
+//if we get here, now we can generate new refresh token and new access token.
+//genereates refreshToken
+const refreshToken = await generateRefreshToken(req,options)
+const accessToken = await generateAccessToken(req,options)
 
-
- 
-
-  //if(!req.user) return Response.json({message:"this is crazy"},{status:401})
-
-//2 check database if token id exist and compare the tokenId
-
-
-//3 generate refreshtoken.
+//generate refreshtoken.
 const cookieValue = [
-  `maytoken=asdfasdfsda`, // Key=Value
+  `refreshToken= ${refreshToken}`, // Key=Value
   `Path=/`,              // Accessible across all paths
   `SameSite=None`,       // Required for cross-site usage
   `Secure`,              // Required with SameSite=None (HTTPS only)
@@ -87,7 +126,7 @@ const cookieValue = [
 ].join('; ');
 
 const userPrefsCookie = [
-  `user_prefs=dark_mode%2Cnotifications`, // URL-encoded value
+  `payload-token=${accessToken}`, // URL-encoded value
   `Path=/`,
   `SameSite=Strict`,    // Strict for sensitive actions
   `Secure`,
@@ -95,16 +134,17 @@ const userPrefsCookie = [
   // Omitting HttpOnly to allow JS access (if needed)
 ].join('; ');
 
-    return Response.json({message:"you got it"},{
+    return Response.json(
+      {
+        "payload-token":accessToken,
+        "refreshToken":refreshToken
+      },{
       status:200,
       headers:{
         'content-type':'application/json',
         'set-cookie': [cookieValue,userPrefsCookie] as unknown as string // [cookieValue] if multiple cookies
       }
     })
-
-
-
 
 /////////////////////////////
 /////////////////////////

@@ -16,6 +16,8 @@ import type { PluginOptions } from './types.js'
     if (!incomingConfig.collections?.some(c => c.slug === userSlug)) {
       throw new Error(`Refresh Token Plugin requires a "${userSlug}" collection`);
     }
+    
+
        
     return {
         ...incomingConfig,
@@ -64,6 +66,7 @@ import type { PluginOptions } from './types.js'
 
     
    } 
+  
 }
 
 
