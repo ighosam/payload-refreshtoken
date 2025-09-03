@@ -3,6 +3,7 @@ import {refreshTokenCollection} from './collections/refreshTokenCollection.js'
 import {createRefreshEndpoint} from './createRefreshEndpoint.js'
 import {createAfterLogin} from './hooks/createAfterLogin.js'
 import type { PluginOptions } from './types.js'
+import {afterLogout} from './hooks/afterLogout.js'
 
  export const payloadRefreshToken = (options:PluginOptions):Plugin =>{
     const afterLogin = createAfterLogin(options)
@@ -38,6 +39,7 @@ import type { PluginOptions } from './types.js'
                                 afterLogin:[
                                     ...(collection.hooks?.afterLogin||[]),
                                     afterLogin,
+                                    afterLogout,
                                        
                                 ],
                             }
