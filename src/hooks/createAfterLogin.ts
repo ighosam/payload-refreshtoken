@@ -1,4 +1,4 @@
-import type { CollectionAfterLoginHook } from 'payload'
+import type { CollectionAfterLoginHook, CollectionConfig } from 'payload'
 import { v4 as uuidv4 } from 'uuid'
 import type { PluginOptions } from '../types.js'
 import {generateRefreshToken} from '../utilities/generateToken.js'
@@ -6,7 +6,7 @@ import {generateRefreshToken} from '../utilities/generateToken.js'
 export const createAfterLogin = (options:PluginOptions):CollectionAfterLoginHook =>{
 
   const afterLogin:CollectionAfterLoginHook = async ({req,user})=>{
-  
+ /*
         try{ 
           
        const token = await generateRefreshToken(req,options)
@@ -26,6 +26,9 @@ export const createAfterLogin = (options:PluginOptions):CollectionAfterLoginHook
 
                 
   return user
+  */
+
+  console.log("THANKS WE ARE GETTING SOMWHERE")
 }
 
 return afterLogin

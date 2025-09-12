@@ -13,6 +13,7 @@ interface YourRequestBody {
   // ... other fields
 }
 export const createRefreshEndpoint = (options:PluginOptions)=>{
+  
   const refreshEndpoint:Endpoint = {
     path: "/mytoken",
     method: "post",

@@ -23,8 +23,6 @@ const userPrefsCookie = [
   // Omitting HttpOnly to allow JS access (if needed)
 ].join('; ');
 
-
-
 // delete refresh-token
      //delete any previous token id for this user
        const delete_tokenId =  await req.payload.delete({
@@ -36,11 +34,12 @@ const userPrefsCookie = [
         } 
        })
 
+
     return Response.json(
       {
         message:"YEAH YOU LOGGED OUT!!!!!"
       },{
-      status:200,
+      status:300,
       headers:{
         'content-type':'application/json',
         'set-cookie': [cookieValue,userPrefsCookie] as unknown as string // [cookieValue] if multiple cookies
