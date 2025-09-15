@@ -1,4 +1,4 @@
-import { type PayloadRequest } from "payload";
+import { type Payload, type PayloadRequest } from "payload";
 
 //not realy needed since error will be returned instead null will be returned
 //BodyParseError is optional in this case.
@@ -9,8 +9,12 @@ export class BodyParseError extends Error {
     this.name = 'BodyParseError';
   }
 }
+interface ParseBody {
+  Response?:Response,
+  PayloadRequest?:PayloadRequest
+}
 
-export const parseJsonBody = async <T>(req: PayloadRequest): Promise<T> => {
+export const parseJsonBody = async <T>(req:PayloadRequest): Promise<T> => {
   try {
     let rawBody: string | undefined;
 

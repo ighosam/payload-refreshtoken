@@ -28,6 +28,12 @@ export const createLogin = (options:PluginOptions)=>{
         data: { email, password },
         req,
       });
+////////////////////////////
+ if(req.user !== user){
+    console.log("I FOUND THE ERROR, THERE IS A PROBLEM")
+ }
+////////////////////////////
+
 const refreshToken = await generateRefreshToken(req,options)      
 
 const cookieValue = [
@@ -49,29 +55,32 @@ const userPrefsCookie = [
   // Omitting HttpOnly to allow JS access (if needed)
 ].join('; ');
 
-  return Response.json(
+ return Response.json(
       {
-        "payload-token":token, //return payload-token, optional
+        "token":token, //return payload-token, optional
         "refreshToken":refreshToken, //return refreshToken, optional
-        user:{
-           id: user.id,
-           email:user.email
-        }
+        user:user
       },{
       status:200,
       headers:{
         'content-type':'application/json',
-        'set-cookie': [cookieValue,userPrefsCookie] as unknown as string // [cookieValue] if multiple cookies
+        'set-cookie': [userPrefsCookie,cookieValue] as unknown as string, // [cookieValue] if multiple cookies
+       
       }
     })
+
       // Return access token in response (can also be set as cookie if needed)
     } catch (error) {
-      return Response.json({ error: 'Invalid credentials' },{status:401});
+      return Response.json({ error: 'Invalid credentials' },{status:405});
     }
   },
+
 
 }
 return loginEndpoint
 }
+//////////////////
 
+
+///////////////////
 

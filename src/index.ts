@@ -5,11 +5,14 @@ import {createAfterLogin} from './hooks/createAfterLogin.js'
 import type { PluginOptions } from './types.js'
 import {afterLogout} from './hooks/afterLogout.js'
 import { createLogin } from './login.js'
+import { createLogout } from './logout.js'
+
 
  export const payloadRefreshToken = (options:PluginOptions):Plugin =>{
     const afterLogin = createAfterLogin(options)
     const refreshEndpoint = createRefreshEndpoint(options)
     const loginEndpoint = createLogin(options)
+    const logoutEndpoint = createLogout(options)
 
    return (incomingConfig:Config)=>{
     const userSlug = options?.userCollectionSlug || 'users';
@@ -49,6 +52,7 @@ import { createLogin } from './login.js'
                         endpoints:[
                       ...(collection.endpoints||[]),
                       loginEndpoint,
+                      logoutEndpoint,
                     ]
                     }
                   
@@ -62,6 +66,7 @@ import { createLogin } from './login.js'
        endpoints:[
         ...(incomingConfig?.endpoints || []),
        refreshEndpoint,
+       
               
        ]
     }
