@@ -16,7 +16,10 @@ const CustomInactivityC  = CustomInactivity  as unknown as CustomComponent
 
 export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
  
-  return (incomingConfig: Config): Config => {
+  return (incomingConfig: Config): Config => { 
+    if(!options.enabled)return incomingConfig
+    
+    
     const userSlug = options?.userCollectionSlug || 'users'
 
     if (!incomingConfig.collections?.some(c => c.slug === userSlug)) {
