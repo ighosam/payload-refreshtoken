@@ -2,7 +2,7 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    // "rootDir": "./src",
+     "rootDir": "./src",
      "outDir": "./dist",
 
     // Environment Settings
@@ -14,6 +14,11 @@
     // "lib": ["esnext"],
     // "types": ["node"],
     // and npm install -D @types/node
+    ///////////////////////////
+    //"moduleResolution": "bundler",
+    //"esModuleInterop": true,
+    //"resolveJsonModule": true,
+    /////////////////////////
 
     // Other Outputs
     "sourceMap": true,
@@ -40,9 +45,9 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/Pindex_BAKUP.text"]
+  //"exclude": ["node_modules"],
   
 }

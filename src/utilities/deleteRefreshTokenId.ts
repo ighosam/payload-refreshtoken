@@ -1,10 +1,9 @@
 import type {PayloadRequest} from 'payload'
 
 export const deleteRefreshTokenId = async (req:PayloadRequest)=>{
-
-try{
-
-await req.payload.delete({
+try{ 
+    //if tokenId exist delete it from the db.
+  const tokenIdExist = await req.payload.delete({
                     collection: 'refresh-token',
                     where: {
                      user:{
@@ -12,8 +11,10 @@ await req.payload.delete({
                      }, 
                     },
                   })
+
+if( !(tokenIdExist.docs.length > 0) ) throw new Error('no file match')         
 }catch(error){
-throw new Error(`There seems to be an error ${error}`)
+throw new Error(`There seems to be an error:  ${error}`)
 }
     
 }

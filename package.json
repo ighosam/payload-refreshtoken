@@ -4,9 +4,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "dev": "tsc --watch"
   },
   "keywords": [],
@@ -14,12 +15,20 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/bcryptjs": "^3.0.0",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
     "cookie": "^1.0.2",
+    "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "payload": "^3.50.0",
+    "payload": "3.62.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10"
   }
+
+
 }

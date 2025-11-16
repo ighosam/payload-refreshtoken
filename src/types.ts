@@ -13,3 +13,9 @@ export interface PluginOptions {
   refreshTokenExpiration?:number
   userCollectionSlug?: string; // Allow custom user collection slug
 }
+
+export type UserData ={
+  id: number,
+  email:string,
+  collection:string
+}

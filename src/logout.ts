@@ -1,97 +1,97 @@
+// endpoints/logout.ts
+import { type Endpoint } from "payload";
+import type { PluginOptions } from "./types.js";
 
-// endpoints/login.ts
-import {type Endpoint, type PayloadRequest } from "payload";
-//import { Response } from 'express';
-import { parseJsonBody} from './utilities/parseJsonBody.js'
-import type { PluginOptions } from './types.js';
-import {deleteRefreshTokenId} from './utilities/deleteRefreshTokenId.js'
-import {parse as parseCookies } from 'cookie'
-import { getRefreshTokenId } from "./utilities/getRefreshTokenId.js";
+//export const createLogout = (options: PluginOptions): Endpoint => {
+  export const logoutEndpoint: Endpoint = {
+    path: "/logout",
+    method: "post",
+    handler: async (req) => {
+      console.log("✅ Using custom logout endpoint");
 
+      try {
+        const payload = req.payload;
+        const user = req.user;
 
-type Authtype = {
-    email:string,
-    password:string
-}
+        // ✅ Store user reference BEFORE clearing anything
+        const userForHooks = user;
 
-export const createLogout = (options:PluginOptions)=>{
+        // Create proper header container
+        const headers = new Headers({
+          "Content-Type": "application/json",
+        });
 
- const logoutEndpoint:Endpoint = {
-  path: "/logout",
-  method: "post",
-  handler: async (req: PayloadRequest) => {
-     
-const cookieValue = [
-  `refreshToken=asdfasdfsd`, // Key=Value
-  `Path=/`,              // Accessible across all paths
-  `SameSite=None`,       // Required for cross-site usage
-  `Secure`,              // Required with SameSite=None (HTTPS only)
-  `HttpOnly`,            // Recommended for security (blocks JS access)
-  `Max-Age=0`,       // Expires in 1 day (in seconds)
-  `Expires=Thu, 01 Jan 1970 00:00:00 GMT`
-].join('; ');
+        // ✅ Clear cookies
+        const cookieOptions =
+          process.env.NODE_ENV === "production"
+            ? "HttpOnly; Path=/; SameSite=Lax; Secure; Max-Age=0"
+            : "HttpOnly; Path=/; SameSite=Lax; Max-Age=0";
 
-const userPrefsCookie = [
-  `payload-token=asdfsadfsd`, // URL-encoded value
-  `Path=/`,
-  `SameSite=Strict`,    // Strict for sensitive actions
-  `Secure`,
-  `httpOnly`,
-  `Max-Age=0`,    // Expires in 30 days
-  `Expires=Thu, 01 Jan 1970 00:00:00 GMT`
-  // Omitting HttpOnly to allow JS access (if needed)
-].join('; ');
-
-///////////////////////////////////
-//This block of code is not needed
-const rawCookieHeader = req.headers.get('cookie')
-const cookies = parseCookies(rawCookieHeader || '')
-const headerToken = cookies['refreshToken']
-const token = cookies['payload-token']
-//////////////////////////////////
-
-  // if we can find a valid refreshTokenId for this user
-  // it means that the user is still logged in or valid user exist
-   const tokenId = await getRefreshTokenId(req)
-  if(tokenId.status!== 200){
-    return Response.json({
-      error:"No valid user found"
-    },{status:500}
-  )
-  }
-const deleted = await deleteRefreshTokenId(req) 
-req.user = null; 
-///////////////////////////////////
+        headers.append("Set-Cookie", `payload-token=; ${cookieOptions}`);
+        headers.append("Set-Cookie", `refreshToken=; ${cookieOptions}`);
+        //req.user = null
 
 
- return Response.json(
-      {
-       message: 'Logged out successfully' 
-      },{
-      status:200,
-      headers:{
-        'content-type':'application/json',
-        'set-cookie': [userPrefsCookie,cookieValue] as unknown as string, // [cookieValue] if multiple cookies
-       
+        // ✅ Get hooks consistently - try both methods
+        let afterLogoutHooks: any[] = [];
+
+        // Method 1: Try via collections access (more reliable)
+        const usersCollection = payload.collections.users;
+        if (usersCollection?.config?.hooks?.afterLogout) {
+          const hooks = usersCollection.config.hooks.afterLogout;
+          afterLogoutHooks = Array.isArray(hooks) ? hooks : [hooks];
+        }
+        // Method 2: Fallback to config access
+        else {
+          const usersConfig = payload.config.collections.find(
+            (c) => c.slug === "users"
+          );
+          if (usersConfig?.hooks?.afterLogout) {
+            const hooks = usersConfig.hooks.afterLogout;
+            afterLogoutHooks = Array.isArray(hooks) ? hooks : [hooks];
+          }
+        }
+
+        // ✅ Run afterLogout hooks with proper error handling
+        if (afterLogoutHooks.length > 0 && userForHooks) {
+          console.log(`🔄 Running ${afterLogoutHooks.length} afterLogout hooks`);
+
+          for (const hook of afterLogoutHooks) {
+            try {
+              if (typeof hook === 'function') {
+                await hook({ user: userForHooks, req });
+                console.log("✅ afterLogout hook executed successfully");
+              }
+
+
+            } catch (hookError) {
+              // Log error but don't break logout process
+              console.error("❌ afterLogout hook failed:", hookError);
+              // Continue with other hooks
+            }
+          }
+        } else if (!userForHooks) {
+          console.log("ℹ️  No user found, skipping afterLogout hooks");
+        }
+
+        // ✅ Return standard JSON response
+        return new Response(
+          JSON.stringify({ message: "Logged out successfully" }),
+          {
+            status: 200,
+            headers,
+          }
+        );
+      } catch (error) {
+        console.error("❌ Logout error:", error);
+        return new Response(
+          JSON.stringify({ 
+            message: "Logout failed", 
+            error: error instanceof Error ? error.message : String(error) 
+          }),
+          { status: 500 }
+        );
       }
-    }) 
-
-
-
- 
-
-/*
-const newResponse = new Headers(response.body)
-
-*/
-
-  },
-
-}
-return logoutEndpoint
-}
-//////////////////
-
-
-///////////////////
+    },
+  };
 

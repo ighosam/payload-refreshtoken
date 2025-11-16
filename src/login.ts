@@ -1,86 +1,67 @@
-// endpoints/login.ts
-import {type Endpoint, type PayloadRequest } from "payload";
-//import { Response } from 'express';
-import type { CollectionAfterLoginHook } from 'payload';
-import {BodyParseError, parseJsonBody} from './utilities/parseJsonBody.js'
+import {type Endpoint, type PayloadRequest,type Payload } from "payload";
 import type { PluginOptions } from './types.js';
 import {generateRefreshToken } from './utilities/generateToken.js'
-
+import { parseRequestBody } from "./utilities/myParsedReqBody.js";
+import jwt from 'jsonwebtoken'
 
 type Authtype = {
     email:string,
     password:string
 }
 
-export const createLogin = (options:PluginOptions)=>{
- const loginEndpoint:Endpoint = {
+//export const createLogin = (options:PluginOptions)=>{
+ export const loginEndpoint:Endpoint = {
   path: "/login",
   method: "post",
   handler: async (req: PayloadRequest) => {
+/////////////////////////////////
+const { TokenExpiredError } = jwt
+/////////////////////////////////
 
-    console.log("I AM USING THIS LOGIN!!!!!!")
-     const data = await parseJsonBody<Authtype>(req)
-  
+ const data = await parseRequestBody(req)
      const { email, password } = data;
+     //const collection = req.user?.collection
+     if(!email) throw new Error("I can't find this email")
     try {
-      const { user, token } = await req.payload.login({
-        collection: 'users',
+      const { user, token,exp } = await req.payload.login({
+        collection:"users",
         data: { email, password },
         req,
       });
-////////////////////////////
- if(req.user !== user){
-    console.log("I FOUND THE ERROR, THERE IS A PROBLEM")
- }
-////////////////////////////
 
-const refreshToken = await generateRefreshToken(req,options)      
-
-const cookieValue = [
-  `refreshToken= ${refreshToken}`, // Key=Value
-  `Path=/`,              // Accessible across all paths
-  `SameSite=None`,       // Required for cross-site usage
-  `Secure`,              // Required with SameSite=None (HTTPS only)
-  `HttpOnly`,            // Recommended for security (blocks JS access)
-  `Max-Age=86400`,       // Expires in 1 day (in seconds)
-].join('; ');
-
-const userPrefsCookie = [
-  `payload-token=${token}`, // URL-encoded value
-  `Path=/`,
-  `SameSite=Strict`,    // Strict for sensitive actions
-  `Secure`,
-  `httpOnly`,
-  `Max-Age=2592000`,    // Expires in 30 days
-  // Omitting HttpOnly to allow JS access (if needed)
-].join('; ');
-
- return Response.json(
-      {
-        "token":token, //return payload-token, optional
-        "refreshToken":refreshToken, //return refreshToken, optional
-        user:user
-      },{
-      status:200,
-      headers:{
-        'content-type':'application/json',
-        'set-cookie': [userPrefsCookie,cookieValue] as unknown as string, // [cookieValue] if multiple cookies
-       
+      const userArg = {
+        id:user.id as number,
+        email: user.email as string,
+        collection: "user"
       }
-    })
 
+     console.log("myOptions is: ",req.payload.config.custom.refreshOptions) 
+//////////////////////
+//const decoded = jwt.decode(token!, { complete: true })
+//console.log("This is the decoded",decoded)
+///////////////////////
+
+//const refreshToken = await generateRefreshToken(req) as string
+const refreshToken = await generateRefreshToken(req) as string
+
+console.log('my refreshToken is: ',refreshToken)
+
+const headers = new Headers()
+headers.append(`set-cookie`, `refreshToken=${refreshToken}; HttpOnly; Path=/; SameSite=Lax; Secure`)
+headers.append(`set-cookie`, `payload-token=${token}; HttpOnly; Path=/; SameSite=Lax; Secure`)
+
+
+return Response.json( 
+    { user, token,refreshToken, exp },
+    { status: 200, headers },  
+)
       // Return access token in response (can also be set as cookie if needed)
     } catch (error) {
       return Response.json({ error: 'Invalid credentials' },{status:405});
     }
-  },
-
+}
 
 }
-return loginEndpoint
-}
-//////////////////
 
 
-///////////////////
 

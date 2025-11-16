@@ -1,28 +1,37 @@
-import type {TypedUser,PayloadRequest} from 'payload'
+import type {PayloadRequest} from 'payload'
 import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
 import type { PluginOptions } from '../types.js'
+import type { UserData } from '../types.js'
 
-export const generateRefreshToken = async (req:PayloadRequest,options?:PluginOptions)=>{
+//export const generateRefreshToken = async (req:PayloadRequest,options?:PluginOptions)=>{
+export const generateRefreshToken = async (req:PayloadRequest)=>{
+    //const expiresIn = req.payload.config.custom.refreshTokenExpiration || process.env.JWT_REFRESH_EXPIRATION
+    const expiresIn = req.payload.config.custom.refreshOptions.refreshTokenExpiration
 
-    const expiresIn = process.env.JWT_REFRESH_EXPIRATION || options?.refreshTokenExpiration
-
+    console.log("ExpiresIn is: ",expiresIn)
     try{
     //const secret = process.env.PAYLOAD_SECRET || 'fasfasfasf'
-    const refreshSecret = process.env.PAYLOAD_SECRET
+    //const refreshSecret = process.env.PAYLOAD_SECRET
+    const refreshSecret = req.payload.secret
+
+  
    if(!refreshSecret) throw new Error("no secret found, Please set up PAYLOAD_SECRET in .env file")
 
     const tokenId = uuidv4()
 
+
     const refreshPayload = {
         tokenId:tokenId, 
-        collection:'users',
+        collection:"user",
         id: req.user?.id  
     }
-    
+
     const token = jwt.sign(refreshPayload,refreshSecret,{
       expiresIn: expiresIn as number, // or 3600 etc
     })
+
+    console.log("TOKEN FROM GEN IS: ",token)
 
     const tokenIdExist = await req.payload.find({
         collection:'refresh-token',
@@ -53,7 +62,7 @@ export const generateRefreshToken = async (req:PayloadRequest,options?:PluginOpt
                     collection: 'refresh-token',
                     data: {
                       tokenId: tokenId,
-                      user: req.user?.id,
+                      user:req.user?.id,
                     },
                   })
     }
@@ -66,9 +75,10 @@ export const generateRefreshToken = async (req:PayloadRequest,options?:PluginOpt
 }
 
 }
-export const generateAccessToken = async (req:PayloadRequest,options?:PluginOptions)=>{
-    const secret = process.env.PAYLOAD_SECRET
-    const expiresIn = process.env.JWT_ACCESS_EXPIRATION || options?.accessTokenExpiration
+export const generateAccessToken = async (req:PayloadRequest)=>{
+    //const secret = process.env.PAYLOAD_SECRET
+    const secret = req.payload.secret
+    const expiresIn = req.payload.config.custom.refreshOptions.accessTokenExpiration
 
     try{
         if(!expiresIn) throw new Error("expiereIn not found, please set up JWT_ACCESS_EXPIRATION in .env file")
@@ -82,7 +92,6 @@ export const generateAccessToken = async (req:PayloadRequest,options?:PluginOpti
                const token = jwt.sign(accessPayload,secret,{
                 expiresIn: expiresIn as number, // or 3600 etc
     })
-
        return token
 
     }catch(error){
