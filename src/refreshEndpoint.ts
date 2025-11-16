@@ -11,9 +11,6 @@ import { isRefreshTokenValid } from "./utilities/isRefreshTokenValid.js";
       // 1. Extract refresh token from request (cookie, body, or header)
       const reqRefreshToken = await getTokenFromRequest(req, "refreshToken");
 
-
-      console.log("refreshToken is: ",reqRefreshToken)
-
       if (!reqRefreshToken) {
         return Response.json(
           { error: "Refresh token is required" },
@@ -63,8 +60,6 @@ import { isRefreshTokenValid } from "./utilities/isRefreshTokenValid.js";
         `Max-Age=${req.payload.config.custom.refreshOptions.accessTokenExpiration}`, // seconds
       ].join("; ");
 
-
-      console.log("PAYLOAD TOKEN IS: ",accessCookie)
       // 6. Return response
       return Response.json(
         {

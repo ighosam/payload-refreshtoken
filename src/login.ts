@@ -35,7 +35,7 @@ const { TokenExpiredError } = jwt
         collection: "user"
       }
 
-     console.log("myOptions is: ",req.payload.config.custom.refreshOptions) 
+    // console.log("myOptions is: ",req.payload.config.custom.refreshOptions) 
 //////////////////////
 //const decoded = jwt.decode(token!, { complete: true })
 //console.log("This is the decoded",decoded)
@@ -43,8 +43,6 @@ const { TokenExpiredError } = jwt
 
 //const refreshToken = await generateRefreshToken(req) as string
 const refreshToken = await generateRefreshToken(req) as string
-
-console.log('my refreshToken is: ',refreshToken)
 
 const headers = new Headers()
 headers.append(`set-cookie`, `refreshToken=${refreshToken}; HttpOnly; Path=/; SameSite=Lax; Secure`)

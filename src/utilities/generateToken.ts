@@ -9,7 +9,7 @@ export const generateRefreshToken = async (req:PayloadRequest)=>{
     //const expiresIn = req.payload.config.custom.refreshTokenExpiration || process.env.JWT_REFRESH_EXPIRATION
     const expiresIn = req.payload.config.custom.refreshOptions.refreshTokenExpiration
 
-    console.log("ExpiresIn is: ",expiresIn)
+  
     try{
     //const secret = process.env.PAYLOAD_SECRET || 'fasfasfasf'
     //const refreshSecret = process.env.PAYLOAD_SECRET
@@ -30,8 +30,6 @@ export const generateRefreshToken = async (req:PayloadRequest)=>{
     const token = jwt.sign(refreshPayload,refreshSecret,{
       expiresIn: expiresIn as number, // or 3600 etc
     })
-
-    console.log("TOKEN FROM GEN IS: ",token)
 
     const tokenIdExist = await req.payload.find({
         collection:'refresh-token',

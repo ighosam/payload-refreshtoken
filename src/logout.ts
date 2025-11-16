@@ -1,6 +1,5 @@
 // endpoints/logout.ts
 import { type Endpoint } from "payload";
-import type { PluginOptions } from "./types.js";
 
 //export const createLogout = (options: PluginOptions): Endpoint => {
   export const logoutEndpoint: Endpoint = {
@@ -12,6 +11,25 @@ import type { PluginOptions } from "./types.js";
       try {
         const payload = req.payload;
         const user = req.user;
+
+        //check if users is still logged in by checking
+        // if refresh token id exist
+        
+        const tokenIdExist = await req.payload.find({
+        collection:'refresh-token',
+        where:{
+         user: {
+            equals:req.user?.id
+         }  
+        },
+        limit: 1
+    })
+    const refreshTokenIdExist = tokenIdExist.docs.length > 0
+
+    
+
+       if(!(user&&refreshTokenIdExist)) throw new Error("No user exist")
+
 
         // ✅ Store user reference BEFORE clearing anything
         const userForHooks = user;
@@ -54,13 +72,13 @@ import type { PluginOptions } from "./types.js";
 
         // ✅ Run afterLogout hooks with proper error handling
         if (afterLogoutHooks.length > 0 && userForHooks) {
-          console.log(`🔄 Running ${afterLogoutHooks.length} afterLogout hooks`);
+         // console.log(`🔄 Running ${afterLogoutHooks.length} afterLogout hooks`);
 
           for (const hook of afterLogoutHooks) {
             try {
               if (typeof hook === 'function') {
                 await hook({ user: userForHooks, req });
-                console.log("✅ afterLogout hook executed successfully");
+               // console.log("✅ afterLogout hook executed successfully");
               }
 
 
