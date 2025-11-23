@@ -6,11 +6,16 @@ import { type Endpoint } from "payload";
     path: "/logout",
     method: "post",
     handler: async (req) => {
-      console.log("✅ Using custom logout endpoint");
 
       try {
         const payload = req.payload;
         const user = req.user;
+
+           //The line below prevent multiple logout in one logout request
+      //if(!req.user) return Response.json({message:"no user found"}) 
+       if(!req.user) return Response.json({ok:true},{status:201})
+      //console.log("✅ Using custom logout endpoint");
+      //console.log('USER IS: ',req.user)
 
         //check if users is still logged in by checking
         // if refresh token id exist
@@ -18,7 +23,7 @@ import { type Endpoint } from "payload";
         const tokenIdExist = await req.payload.find({
         collection:'refresh-token',
         where:{
-         user: {
+         id: {
             equals:req.user?.id
          }  
         },
