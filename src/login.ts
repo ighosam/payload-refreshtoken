@@ -1,65 +1,71 @@
-import {type Endpoint, type PayloadRequest,type Payload } from "payload";
-import type { PluginOptions } from './types.js';
-import {generateRefreshToken } from './utilities/generateToken.js'
+import { type Endpoint, type PayloadRequest } from "payload";
+import { generateRefreshToken } from './utilities/generateToken.js';
 import { parseRequestBody } from "./utilities/myParsedReqBody.js";
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
+import type { PluginOptions } from './types.js';
 
-type Authtype = {
-    email:string,
-    password:string
+type AuthType = {
+    email: string;
+    password: string;
 }
 
-//export const createLogin = (options:PluginOptions)=>{
- export const loginEndpoint:Endpoint = {
-  path: "/login",
-  method: "post",
-  handler: async (req: PayloadRequest) => {
-/////////////////////////////////
-const { TokenExpiredError } = jwt
-/////////////////////////////////
+// Login endpoint for Payload CMS
+export const loginEndpoint: Endpoint = {
+    path: "/login",
+    method: "post",
+    handler: async (req: PayloadRequest) => {
+        // Destructure JWT error type (optional, for future error handling)
+        const { TokenExpiredError } = jwt;
 
- const data = await parseRequestBody(req)
-     const { email, password } = data;
-     //const collection = req.user?.collection
-     if(!email) throw new Error("I can't find this email")
-    try {
-      const { user, token,exp } = await req.payload.login({
-        collection:"users",
-        data: { email, password },
-        req,
-      });
+        // Parse incoming request body (using custom parser utility)
+        const data = await parseRequestBody(req);
+        const { email, password } = data;
 
-      const userArg = {
-        id:user.id as number,
-        email: user.email as string,
-        collection: "user"
-      }
+        // Basic validation
+        if (!email) throw new Error("Email is required");
+        if (!password) throw new Error("Password is required");
 
-    // console.log("myOptions is: ",req.payload.config.custom.refreshOptions) 
-//////////////////////
-//const decoded = jwt.decode(token!, { complete: true })
-//console.log("This is the decoded",decoded)
-///////////////////////
+        try {
+            // Attempt login using Payload's built-in login method
+            const { user, token, exp } = await req.payload.login({
+                collection: "users",
+                data: { email, password },
+                req,
+            });
 
-//const refreshToken = await generateRefreshToken(req) as string
-const refreshToken = await generateRefreshToken(req) as string
+            // Construct a simplified user object (optional, useful for frontend)
+            const userArg = {
+                id: user.id as number,
+                email: user.email as string,
+                collection: "user",
+            };
 
-const headers = new Headers()
-headers.append(`set-cookie`, `refreshToken=${refreshToken}; HttpOnly; Path=/; SameSite=Lax; Secure`)
-headers.append(`set-cookie`, `payload-token=${token}; HttpOnly; Path=/; SameSite=Lax; Secure`)
+            // Generate a custom refresh token
+            const refreshToken = await generateRefreshToken(req) as string;
 
+            // Set HTTP-only cookies for access and refresh tokens
+            const headers = new Headers();
+            headers.append(
+                'set-cookie',
+                `refreshToken=${refreshToken}; HttpOnly; Path=/; SameSite=Lax; Secure`
+            );
+            headers.append(
+                'set-cookie',
+                `payload-token=${token}; HttpOnly; Path=/; SameSite=Lax; Secure`
+            );
 
-return Response.json( 
-    { user, token,refreshToken, exp },
-    { status: 200, headers },  
-)
-      // Return access token in response (can also be set as cookie if needed)
-    } catch (error) {
-      return Response.json({ error: 'Invalid credentials' },{status:405});
+            // Return user info and tokens as JSON with cookies set
+            return Response.json(
+                { user, token, refreshToken, exp },
+                { status: 200, headers }
+            );
+
+        } catch (error) {
+            // Catch login failures (invalid credentials)
+            return Response.json(
+                { error: 'Invalid credentials' },
+                { status: 405 }
+            );
+        }
     }
-}
-
-}
-
-
-
+};
