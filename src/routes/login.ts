@@ -2,14 +2,12 @@ import { type Endpoint, type PayloadRequest } from "payload";
 import { generateRefreshToken } from '../utilities/generateToken.js';
 import { parseRequestBody } from "../utilities/myParsedReqBody.js";
 import jwt from 'jsonwebtoken';
-import type { PluginOptions } from '../types.js';
 import { tokenNames } from "../utilities/tokenNames.js";
 
 type AuthType = {
     email: string;
     password: string;
 }
-
 // Login endpoint for Payload CMS
 export const loginEndpoint: Endpoint = {
     path: "/login",
@@ -18,7 +16,6 @@ export const loginEndpoint: Endpoint = {
  
         // Destructure JWT error type (optional, for future error handling)
         const { TokenExpiredError } = jwt;
-
 
         // Parse incoming request body (using custom parser utility)
         const data = await parseRequestBody(req);
@@ -64,7 +61,6 @@ export const loginEndpoint: Endpoint = {
             );
            
             // Return user info and tokens as JSON with cookies set
-           console.log("secret is: ",req.payload.secret)
             return Response.json(
                 { user, token, refreshResault, exp },
                 { status: 200, headers }

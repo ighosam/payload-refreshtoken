@@ -13,14 +13,17 @@ export const logoutEndpoint: Endpoint = {
     try {
       const payload = req.payload;
       //const user = req.user; // getting user this way is not reliable for admin UI
-     
-    
+
     const refreshToken = await getTokenFromRequest(req,REFRESHTOKEN) as string
+   //if there no refreshToken return, no refresh token to clear
+   // user not possibly logged in
+   
+     if (!refreshToken) {
+        return Response.json({ ok: true }, { status: 200 });
+      }
 
    const decoded = jwt.verify(refreshToken,payload.secret ) as jwt.JwtPayload
-        const {tokenId,collection,userId,iat,exp} = decoded
-
-        console.log("this is the id: ",userId)
+        const {userId} = decoded
 
          const findUser = await payload.find({
           collection: 'users',
@@ -34,44 +37,19 @@ export const logoutEndpoint: Endpoint = {
 
        const userFromToken = findUser.docs[0]
 
-       console.log("the user is : ",userFromToken)
 
       //get user from req or from refresh token which ever is defined
        const user = userFromToken ? userFromToken : req.user
-
-       console.log("this user is : ",user)
-
       
       // -------------------------------------------------------------------
       // 1. Prevent multiple logouts and handle missing user
       // -------------------------------------------------------------------
       // If no user exists, simply return ok:true (idempotent logout)
-   /*
+   
       if (!user) {
-        console.log('NO USER FOUND OOOOO')
         return Response.json({ ok: true }, { status: 200 });
       }
-      console.log("This logout is now called: ",user)
-      
-      // -------------------------------------------------------------------
-      // 2. Verify the refresh-token entry still exists
-      // Prevents logging out users who have already revoked their tokens
-      // -------------------------------------------------------------------
-    
-      const tokenLookup = await payload.find({
-        collection: "refresh-token",
-        where: {
-          user: { equals: user?.id },
-        },
-        limit: 1,
-      });
 
-      const hasRefreshToken = tokenLookup.docs.length > 0;
-
-      if (!hasRefreshToken) {
-        throw new Error("No active refresh token found for user");
-      }
-*/
       // Store the user reference for hooks BEFORE clearing anything
       const userForHooks = user;
     

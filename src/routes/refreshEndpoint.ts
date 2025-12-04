@@ -13,7 +13,6 @@ import jwt from 'jsonwebtoken'
       const {PAYLOADTOKEN,REFRESHTOKEN} = tokenNames()
       // 1. Extract refresh token from request (cookie, body, or header)
       const reqRefreshToken = await getTokenFromRequest(req, REFRESHTOKEN);
-      const accToken = await getTokenFromRequest(req,PAYLOADTOKEN) as string
 
       if (!reqRefreshToken) {
         return Response.json(
@@ -34,9 +33,6 @@ import jwt from 'jsonwebtoken'
       
       const decoded = jwt.verify(reqRefreshToken,req.payload.secret ) as jwt.JwtPayload
       const {userId,sid} = decoded
-      const refExp = decoded.exp
-
-      const accessDecoded = jwt.verify(accToken,req.payload.secret) as jwt.JwtPayload
       
       const userResult = await req.payload.find({
         collection:'users',
