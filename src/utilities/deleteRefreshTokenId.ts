@@ -1,13 +1,13 @@
-import type {PayloadRequest} from 'payload'
+import type {Payload} from 'payload'
 
-export const deleteRefreshTokenId = async (req:PayloadRequest)=>{
+export const deleteRefreshTokenId = async (payload:Payload,tokenId:string)=>{
 try{ 
     //if tokenId exist delete it from the db.
-  const tokenIdExist = await req.payload.delete({
+  const tokenIdExist = await payload.delete({
                     collection: 'refresh-token',
                     where: {
-                     user:{
-                        equals:req.user?.id,
+                     tokenId:{
+                        equals:tokenId,
                      }, 
                     },
                   })

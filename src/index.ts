@@ -1,8 +1,8 @@
 import type { Plugin, Config, CustomComponent} from 'payload'
 import { refreshTokenCollection } from './collections/refreshTokenCollection.js'
-import { refreshEndpoint } from './refreshEndpoint.js'
-import {loginEndpoint} from './login.js'
-import {logoutEndpoint} from './logout.js'
+import { refreshEndpoint } from './routes/refreshEndpoint.js'
+import {loginEndpoint} from './routes/login.js'
+import {logoutEndpoint} from './routes/logout.js'
 import {afterLogin} from './hooks/afterLogin.js'
 import { afterLogout } from './hooks/afterLogout.js'
 import { getExistingAuth } from './utilities/auth/getExistingAuth.js'
@@ -10,6 +10,7 @@ import { getExistingStrategy } from './utilities/auth/getExistingStrategy.js'
 import type { PluginOptions } from './types.js'
 import InactivityNotice from './componenet/InactivityNotice.js'
 import CustomInactivity from './componenet/CustomInactivity.js'
+import {CustomLogoutButton} from './componenet/CustomLogoutButton.js'
 
 const InactivityNoticeC  = InactivityNotice  as unknown as CustomComponent
 const CustomInactivityC  = CustomInactivity  as unknown as CustomComponent
@@ -30,42 +31,68 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
    
     return {
       ...incomingConfig,
+        
       plugins:[
          ...(incomingConfig.plugins || [])
       ],
+      //declear variables you will like to have global access to
           custom:{
             ...(incomingConfig.custom||{}),
-            refreshOptions:options
+            refreshOptions:options,
           },
+          
       admin: {
         ...(incomingConfig.admin || {}),
          routes:{
           inactivity:'/custom-inactivity',
         },
-           
+       
         components: {
+          
           ...(incomingConfig.admin?.components || {}),
+          
           beforeDashboard: [
             ...(incomingConfig.admin?.components?.beforeDashboard || []),   
-          ],
-        afterNavLinks: [
-          ...(incomingConfig.admin?.components?.afterNavLinks || []),
          
+          ],
+          afterDashboard:[
+           ...(incomingConfig.admin?.components?.afterDashboard || []),
+            
+          ],
+          beforeNavLinks:[
+           ...(incomingConfig.admin?.components?.beforeNavLinks || []),
+          ],
+
+        afterNavLinks: [
+          ...(incomingConfig.admin?.components?.afterNavLinks || []),    
         ],
+        
            beforeLogin: [
         ...(incomingConfig.admin?.components?.beforeLogin || []),
             InactivityNoticeC,
       ],
+        afterLogin:[
+          ...(incomingConfig.admin?.components?.afterLogin || []),
+        ],
+    
+       
+        logout:{
+         ...(incomingConfig.admin?.components?.logout || []),
+         Button: CustomLogoutButton as unknown as CustomComponent,
+         
+       },
+       
+       
          views:{
+         
           CustomInactivity:{
             Component:CustomInactivityC,
             path:'/custom-inactivity'
-          }
-         }
-       
+          },
+         }      
         },  
       },
-
+      
       collections: [
         ...(incomingConfig.collections || []).map(collection => {
           if (collection.slug !== userSlug) return collection
@@ -76,39 +103,56 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
           return {
             ...collection,
             
-            auth: {
-              existingAuth,
-
-              strategies: [...(existingStrategy || [])],
-            refreshTokens: true, 
-             tokenExpiration: options?.accessTokenExpiration || 60 * 2, // 3 minutes
+            admin:{
+              ...(collection.admin||{}),
               
-             //place plugin options in config for easy access at runtime
+            },
             
+            auth: { 
+             existingAuth,
+             //enable:true,    
+             strategies: [...(existingStrategy || [])],
+             refreshTokens: true, 
+             tokenExpiration: options?.accessTokenExpiration || 60 * 3, // 2 minutes
+          
+             ///////////////////////////////
+              /*
+              refresh: {
+              interval: 2 * 60 * 1000, // 5 minutes
+              method: async (args:any) => {
+              const { collection, req, res, token } = args;
+
+             console.log("CALL THIS ENDPOINT EVERY 1 MINUTE")
+             }
+            },
+            */
+             ////////////////////////////////
+             
             },
             
             hooks: {
               ...(collection.hooks || {}),
               afterLogin: [...(collection.hooks?.afterLogin || []), afterLogin],
+              
               afterLogout: [
                 ...(collection.hooks?.afterLogout || []),
-                afterLogout
+               // afterLogout
               ],
-            
+                   
             },
             endpoints: [
               ...(collection.endpoints || []),
               loginEndpoint,
               logoutEndpoint,
-              refreshEndpoint
-             
+              refreshEndpoint,      
             ],  
               
           } 
          
         }),
        refreshTokenCollection,
-      ],
+      
+      ]
       
     }
   }

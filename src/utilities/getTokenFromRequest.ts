@@ -1,9 +1,13 @@
 import { type PayloadRequest } from "payload";
 import { parse as parseCookies } from "cookie";
 import { BodyParseError, parseRequestBody } from "./myParsedReqBody.js";
+import { tokenNames } from "./tokenNames.js";
+
+const {PAYLOADTOKEN,REFRESHTOKEN} = tokenNames()
 
 // Define all valid token names
-const VALID_TOKEN_NAMES = ["payload-token", "refreshToken"] as const;
+const VALID_TOKEN_NAMES = [PAYLOADTOKEN,REFRESHTOKEN] as const;
+
 
 // Creates a union type: "access-token" | "refresh-token"
 type TokenName = (typeof VALID_TOKEN_NAMES)[number];

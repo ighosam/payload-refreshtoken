@@ -11,8 +11,6 @@ import {parseRequestBody} from '../utilities/myParsedReqBody.js'
   export const afterLogin:CollectionAfterLoginHook = async ({req,user})=>{
 
   
-    
-const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 60 * 100)
 
        /* 
         let foundToken:string
@@ -29,6 +27,7 @@ const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 60 * 100)
             throw new Error("Login error, try agian")
         }    
      */
+    
 
   return user 
 

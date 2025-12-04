@@ -1,8 +1,9 @@
 import { type Endpoint, type PayloadRequest } from "payload";
-import { generateRefreshToken } from './utilities/generateToken.js';
-import { parseRequestBody } from "./utilities/myParsedReqBody.js";
+import { generateRefreshToken } from '../utilities/generateToken.js';
+import { parseRequestBody } from "../utilities/myParsedReqBody.js";
 import jwt from 'jsonwebtoken';
-import type { PluginOptions } from './types.js';
+import type { PluginOptions } from '../types.js';
+import { tokenNames } from "../utilities/tokenNames.js";
 
 type AuthType = {
     email: string;
@@ -14,8 +15,10 @@ export const loginEndpoint: Endpoint = {
     path: "/login",
     method: "post",
     handler: async (req: PayloadRequest) => {
+ 
         // Destructure JWT error type (optional, for future error handling)
         const { TokenExpiredError } = jwt;
+
 
         // Parse incoming request body (using custom parser utility)
         const data = await parseRequestBody(req);
@@ -32,33 +35,42 @@ export const loginEndpoint: Endpoint = {
                 data: { email, password },
                 req,
             });
+            //verify the token here and save sid to context 
+            if(!token) throw new Error("Unable to complete login")
+            const decoded = jwt.verify(token,req.payload.secret ) as jwt.JwtPayload
+            const {sid} = decoded
+            
 
-            // Construct a simplified user object (optional, useful for frontend)
-            const userArg = {
-                id: user.id as number,
-                email: user.email as string,
-                collection: "user",
-            };
 
+         //make sure req.user is always defined mostly for admin UI
+          if(!req.user || req.user === null) req.user = user
+
+            
             // Generate a custom refresh token
-            const refreshToken = await generateRefreshToken(req) as string;
+            const refreshResault = await generateRefreshToken(req,sid) as string;
 
             // Set HTTP-only cookies for access and refresh tokens
             const headers = new Headers();
+            const {REFRESHTOKEN,PAYLOADTOKEN} = tokenNames()
+            
             headers.append(
                 'set-cookie',
-                `refreshToken=${refreshToken}; HttpOnly; Path=/; SameSite=Lax; Secure`
+                `${REFRESHTOKEN}=${refreshResault}; HttpOnly; Path=/; SameSite=Lax; Secure`
             );
+            
             headers.append(
                 'set-cookie',
-                `payload-token=${token}; HttpOnly; Path=/; SameSite=Lax; Secure`
+                `${PAYLOADTOKEN}=${token}; HttpOnly; Path=/; SameSite=Lax; Secure`
             );
-
+           
             // Return user info and tokens as JSON with cookies set
+           console.log("secret is: ",req.payload.secret)
             return Response.json(
-                { user, token, refreshToken, exp },
+                { user, token, refreshResault, exp },
                 { status: 200, headers }
             );
+
+
 
         } catch (error) {
             // Catch login failures (invalid credentials)

@@ -1,18 +1,22 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef,useState } from 'react'
 
 export default function CustomInactivity() {
+  const hasRun = useRef(false)
+
+
   useEffect(() => {
-    // call logout API
+    if (hasRun.current) return
+    hasRun.current = true
+    
     fetch('/api/users/logout', {
       method: 'POST',
-      credentials: 'include', // include cookies
+      credentials: 'include',
+    }).finally(() => {
+      window.location.href = '/admin/login?reason=inactivity'
     })
-      .finally(() => {
-        // redirect to admin login
-        window.location.href = '/admin/login?reason=inactivity'
-      })
+
   }, [])
 
   return (
