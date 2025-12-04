@@ -11,22 +11,22 @@ export const afterLogout:CollectionAfterLogoutHook = async ({req})=>{
   const refreshToken = await getTokenFromRequest(req,REFRESHTOKEN) as string 
   const secret = req.payload.secret
   const decoded = jwt.verify(refreshToken,secret ) as jwt.JwtPayload
-      const {tokenId,collection,id,iat,exp} = decoded
+      const {tokenId,collection,sid,userId} = decoded
 
       const user = await req.payload.find({
         collection:'users',
         where:{
           id:{
-            equals:id
+            equals:userId
           }
           
         },
         limit: 1,
       })
-console.log("I found a user he is: ",user.docs[0])
+//console.log("I found a user he is: ",user.docs[0])
 
-     deleteRefreshTokenId(req.payload,tokenId)
-   console.log("YEAH YOU LOGGED OUT!!!!!") // Call your logout endpoint to clear HttpOnly cookies
+  const deleted =   await deleteRefreshTokenId(req.payload,tokenId)
+  // console.log("YEAH YOU LOGGED OUT!!!!!: ",deleted) // Call your logout endpoint to clear HttpOnly cookies
           
 return 'success'
 

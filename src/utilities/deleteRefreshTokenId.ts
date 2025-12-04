@@ -12,7 +12,8 @@ try{
                     },
                   })
 
-if( !(tokenIdExist.docs.length > 0) ) throw new Error('no file match')         
+if( !(tokenIdExist.docs.length > 0) ) throw new Error('no file match') 
+  return "success"        
 }catch(error){
 throw new Error(`There seems to be an error:  ${error}`)
 }

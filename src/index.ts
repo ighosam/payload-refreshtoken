@@ -136,7 +136,7 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
               
               afterLogout: [
                 ...(collection.hooks?.afterLogout || []),
-               // afterLogout
+               afterLogout
               ],
                    
             },
