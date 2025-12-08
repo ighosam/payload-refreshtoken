@@ -3,6 +3,7 @@ import { type Endpoint } from "payload";
 import { tokenNames } from "../utilities/tokenNames.js";
 import { getTokenFromRequest } from "../utilities/getTokenFromRequest.js";
 import jwt from 'jsonwebtoken'
+import { deleteRefreshTokenId } from "../utilities/deleteRefreshTokenId.js";
 
 
 const {PAYLOADTOKEN,REFRESHTOKEN} = tokenNames()
@@ -10,20 +11,19 @@ export const logoutEndpoint: Endpoint = {
   path: "/logout",
   method: "post",
   handler: async (req) => {
+    
     try {
       const payload = req.payload;
       //const user = req.user; // getting user this way is not reliable for admin UI
-
     const refreshToken = await getTokenFromRequest(req,REFRESHTOKEN) as string
    //if there no refreshToken return, no refresh token to clear
    // user not possibly logged in
-   
      if (!refreshToken) {
         return Response.json({ ok: true }, { status: 200 });
       }
 
    const decoded = jwt.verify(refreshToken,payload.secret ) as jwt.JwtPayload
-        const {userId} = decoded
+        const {userId,tokenId} = decoded
 
          const findUser = await payload.find({
           collection: 'users',
@@ -49,6 +49,8 @@ export const logoutEndpoint: Endpoint = {
       if (!user) {
         return Response.json({ ok: true }, { status: 200 });
       }
+
+       console.log("YOU CALLED LOGOUT AND NOW YOU ARE LOGGED OUT !!!!1")
 
       // Store the user reference for hooks BEFORE clearing anything
       const userForHooks = user;
@@ -91,6 +93,7 @@ export const logoutEndpoint: Endpoint = {
       // -------------------------------------------------------------------
       // 5. Execute afterLogout hooks safely
       // -------------------------------------------------------------------
+
       for (const hook of afterLogoutHooks) {
         try {
           if (typeof hook === "function") {
@@ -101,7 +104,23 @@ export const logoutEndpoint: Endpoint = {
           console.error("afterLogout hook failed:", hookError);
         }
       }
+      
+     // first make sure tokenId exist before deleting to avoid
+     // the code failing
+          const findTokenId_inDb = await payload.find({
+          collection: 'refresh-token',
+          where:{
+            tokenId:{
+              equals:tokenId
+            }
+          },
+          limit:1
+         })
 
+    const tokenIdExist_inDb = findTokenId_inDb.docs.length > 0
+    tokenIdExist_inDb && await deleteRefreshTokenId(req.payload,tokenId)
+//End of protection of delete of tokenId code
+        
       // -------------------------------------------------------------------
       // 6. Return success response
       // -------------------------------------------------------------------

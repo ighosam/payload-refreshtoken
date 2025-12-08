@@ -1,7 +1,11 @@
 import jwt from 'jsonwebtoken'
 import { type Payload, type PayloadRequest } from 'payload';
 
-export const isRefreshTokenValid = async (req:PayloadRequest,token: string): Promise<boolean> =>{
+const output = ["valid", "invalid", "compromised"] as const
+
+type OutputType = (typeof output)[number]
+
+export const isRefreshTokenValid = async (req:PayloadRequest,token: string): Promise<OutputType> =>{
 const { TokenExpiredError } = jwt
 
 const deleteRefreshTokenId = async (req:PayloadRequest,tokenId:string)=>{
@@ -40,19 +44,19 @@ const deleteRefreshTokenId = async (req:PayloadRequest,tokenId:string)=>{
     if(!(tokenIdExist.docs.length > 0)) throw Error("NO TOKENID REFRENCE IN DB")
     if(tokenId != tokenIdExist.docs[0]?.tokenId )throw Error ("TOKEN_ID DON'T MATCH")
   
-     return true
+     return 'valid'
 
   } catch (error: any) {
     // Other errors (invalid signature, malformed token)
       if (error instanceof jwt.TokenExpiredError || error.message === "TOKEN_ID DON'T MATCH") {
     //This user has expired or invalidated refresh token (delete tokenId from db)
-
-        deleteRefreshTokenId(req,tokenId)
+         return 'compromised'
+       // deleteRefreshTokenId(req,tokenId)
   } else if (error instanceof jwt.JsonWebTokenError) {
     // handle invalid token
-    return false
+    return 'invalid'
   }
 
-    return false
+    return 'invalid'
   }
 }

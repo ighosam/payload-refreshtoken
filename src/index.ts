@@ -9,8 +9,9 @@ import { getExistingAuth } from './utilities/auth/getExistingAuth.js'
 import { getExistingStrategy } from './utilities/auth/getExistingStrategy.js'
 import type { PluginOptions } from './types.js'
 import InactivityNotice from './componenet/InactivityNotice.js'
-import CustomInactivity from './componenet/CustomInactivity.js'
+import {CustomInactivity} from './componenet/CustomInactivity.js'
 import {CustomLogoutButton} from './componenet/CustomLogoutButton.js'
+import { revokeRefreshEndpoint } from './routes/revokeRefreshEndpoint.js'
 
 const InactivityNoticeC  = InactivityNotice  as unknown as CustomComponent
 const CustomInactivityC  = CustomInactivity  as unknown as CustomComponent
@@ -19,8 +20,7 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
  
   return (incomingConfig: Config): Config => { 
     if(!options.enabled)return incomingConfig
-    
-    
+       
     const userSlug = options?.userCollectionSlug || 'users'
 
     if (!incomingConfig.collections?.some(c => c.slug === userSlug)) {
@@ -31,7 +31,7 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
    
     return {
       ...incomingConfig,
-        
+     
       plugins:[
          ...(incomingConfig.plugins || [])
       ],
@@ -44,7 +44,7 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
       admin: {
         ...(incomingConfig.admin || {}),
          routes:{
-          inactivity:'/custom-inactivity',
+        inactivity:'/custom-inactivity',
         },
        
         components: {
@@ -52,24 +52,25 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
           ...(incomingConfig.admin?.components || {}),
           
           beforeDashboard: [
-            ...(incomingConfig.admin?.components?.beforeDashboard || []),   
-         
+            ...(incomingConfig.admin?.components?.beforeDashboard || []),
+           
           ],
           afterDashboard:[
            ...(incomingConfig.admin?.components?.afterDashboard || []),
-            
+           
           ],
           beforeNavLinks:[
            ...(incomingConfig.admin?.components?.beforeNavLinks || []),
           ],
 
         afterNavLinks: [
-          ...(incomingConfig.admin?.components?.afterNavLinks || []),    
-        ],
-        
+          ...(incomingConfig.admin?.components?.afterNavLinks || []),
+            
+        ], 
            beforeLogin: [
         ...(incomingConfig.admin?.components?.beforeLogin || []),
             InactivityNoticeC,
+           
       ],
         afterLogin:[
           ...(incomingConfig.admin?.components?.afterLogin || []),
@@ -79,17 +80,16 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
         logout:{
          ...(incomingConfig.admin?.components?.logout || []),
          Button: CustomLogoutButton as unknown as CustomComponent,
-         
+          
        },
-       
-       
          views:{
-         
           CustomInactivity:{
             Component:CustomInactivityC,
             path:'/custom-inactivity'
           },
-         }      
+       
+         } 
+            
         },  
       },
       
@@ -105,7 +105,7 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
             
             admin:{
               ...(collection.admin||{}),
-              
+             
             },
             
             auth: { 
@@ -138,13 +138,18 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
                 ...(collection.hooks?.afterLogout || []),
                afterLogout
               ],
+              beforeLogin:[
+                ...(collection.hooks?.beforeLogin || []),
+               
+              ]
                    
             },
             endpoints: [
               ...(collection.endpoints || []),
               loginEndpoint,
               logoutEndpoint,
-              refreshEndpoint,      
+              refreshEndpoint,
+              revokeRefreshEndpoint      
             ],  
               
           } 

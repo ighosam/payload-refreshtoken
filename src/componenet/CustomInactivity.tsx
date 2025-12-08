@@ -1,28 +1,22 @@
 'use client'
+import React, { useEffect } from 'react'
+let logoutExecuted = false
 
-import React, { useEffect, useRef,useState } from 'react'
-
-export default function CustomInactivity() {
-  const hasRun = useRef(false)
-
-
+export const CustomInactivity = () =>{
   useEffect(() => {
-    if (hasRun.current) return
-    hasRun.current = true
-    
+    if (logoutExecuted) return
+    logoutExecuted = true
     fetch('/api/users/logout', {
       method: 'POST',
       credentials: 'include',
     }).finally(() => {
       window.location.href = '/admin/login?reason=inactivity'
     })
-
   }, [])
 
   return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
+    <div>
       <h1>Logging you out due to inactivity...</h1>
-      <p>Please wait a moment.</p>
     </div>
   )
 }

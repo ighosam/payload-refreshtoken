@@ -5,6 +5,7 @@ import { isRefreshTokenValid } from "../utilities/isRefreshTokenValid.js";
 import { tokenNames } from "../utilities/tokenNames.js";
 import type {TypedUser} from 'payload'
 import jwt from 'jsonwebtoken'
+import { deleteRefreshTokenId } from "../utilities/deleteRefreshTokenId.js";
 
   export const refreshEndpoint: Endpoint = {
     path: "/refresh-token",
@@ -24,7 +25,12 @@ import jwt from 'jsonwebtoken'
       // 2. Validate refresh token
       const refreshTokenIsValid = await isRefreshTokenValid(req, reqRefreshToken);
      
-      if (!refreshTokenIsValid) {
+      if (refreshTokenIsValid != 'valid') {
+        if(refreshTokenIsValid === 'compromised')
+        {//if this refresh token seems to be stolen or compromised
+          deleteRefreshTokenId(req.payload,reqRefreshToken)
+        }
+        
         return Response.json(
           { error: "Invalid or expired refresh token" },
           { status: 401 }
