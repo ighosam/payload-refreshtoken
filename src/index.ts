@@ -1,17 +1,17 @@
 import type { Plugin, Config, CustomComponent} from 'payload'
-import { refreshTokenCollection } from './collections/refreshTokenCollection.js'
-import { refreshEndpoint } from './routes/refreshEndpoint.js'
-import {loginEndpoint} from './routes/login.js'
-import {logoutEndpoint} from './routes/logout.js'
-import {afterLogin} from './hooks/afterLogin.js'
-import { afterLogout } from './hooks/afterLogout.js'
-import { getExistingAuth } from './utilities/auth/getExistingAuth.js'
-import { getExistingStrategy } from './utilities/auth/getExistingStrategy.js'
-import type { PluginOptions } from './types.js'
-import InactivityNotice from './componenet/InactivityNotice.js'
-import {CustomInactivity} from './componenet/CustomInactivity.js'
-import {CustomLogoutButton} from './componenet/CustomLogoutButton.js'
-import { revokeRefreshEndpoint } from './routes/revokeRefreshEndpoint.js'
+import { refreshTokenCollection } from './collections/refreshTokenCollection'
+import { refreshEndpoint } from './routes/refreshEndpoint'
+import {loginEndpoint} from './routes/login'
+import {logoutEndpoint} from './routes/logout'
+import {afterLogin} from './hooks/afterLogin'
+import { afterLogout } from './hooks/afterLogout'
+import { getExistingAuth } from './utilities/auth/getExistingAuth'
+import { getExistingStrategy } from './utilities/auth/getExistingStrategy'
+import type { PluginOptions } from './types'
+import InactivityNotice from './componenet/InactivityNotice'
+import {CustomInactivity} from './componenet/CustomInactivity'
+import {CustomLogoutButton} from './componenet/CustomLogoutButton'
+import { revokeRefreshEndpoint } from './routes/revokeRefreshEndpoint'
 
 const InactivityNoticeC  = InactivityNotice  as unknown as CustomComponent
 const CustomInactivityC  = CustomInactivity  as unknown as CustomComponent
@@ -26,8 +26,6 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
     if (!incomingConfig.collections?.some(c => c.slug === userSlug)) {
       throw new Error(`RefreshToken Plugin requires a "${userSlug}" collection`)
     }
-
-    // ✅ No importMap — absolute paths only
    
     return {
       ...incomingConfig,
@@ -110,6 +108,7 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
             
             auth: { 
              existingAuth,
+            
              //enable:true,    
              strategies: [...(existingStrategy || [])],
              refreshTokens: true, 

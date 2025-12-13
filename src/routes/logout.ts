@@ -1,9 +1,9 @@
 // endpoints/logout.ts
 import { type Endpoint } from "payload";
-import { tokenNames } from "../utilities/tokenNames.js";
-import { getTokenFromRequest } from "../utilities/getTokenFromRequest.js";
+import { tokenNames } from "../utilities/tokenNames";
+import { getTokenFromRequest } from "../utilities/getTokenFromRequest";
 import jwt from 'jsonwebtoken'
-import { deleteRefreshTokenId } from "../utilities/deleteRefreshTokenId.js";
+import { deleteRefreshTokenId } from "../utilities/deleteRefreshTokenId";
 
 
 const {PAYLOADTOKEN,REFRESHTOKEN} = tokenNames()
@@ -11,7 +11,7 @@ export const logoutEndpoint: Endpoint = {
   path: "/logout",
   method: "post",
   handler: async (req) => {
-    
+
     try {
       const payload = req.payload;
       //const user = req.user; // getting user this way is not reliable for admin UI

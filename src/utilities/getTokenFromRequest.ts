@@ -1,7 +1,7 @@
 import { type PayloadRequest } from "payload";
 import { parse as parseCookies } from "cookie";
-import { BodyParseError, parseRequestBody } from "./myParsedReqBody.js";
-import { tokenNames } from "./tokenNames.js";
+import { BodyParseError, parseRequestBody } from "./myParsedReqBody";
+import { tokenNames } from "./tokenNames";
 
 const {PAYLOADTOKEN,REFRESHTOKEN} = tokenNames()
 

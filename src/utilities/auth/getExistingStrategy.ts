@@ -1,5 +1,5 @@
 import type {AuthCollection, AuthStrategy, CollectionConfig, IncomingAuthType} from 'payload'
-import type { PluginOptions } from '../../types.js';
+import type { PluginOptions } from '../../types';
 
 export const getExistingStrategy = (collection:CollectionConfig,options?:PluginOptions):AuthStrategy[]|undefined =>{
 

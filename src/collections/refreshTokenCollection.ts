@@ -1,4 +1,4 @@
-import type {RefreshCollection} from '../types.js'
+import type {RefreshCollection} from '../types'
 
 export const refreshTokenCollection:RefreshCollection = {
 

@@ -1,5 +1,5 @@
 import type {AuthStrategy, CollectionConfig, IncomingAuthType} from 'payload'
-import type { PluginOptions } from '../../types.js';
+import type { PluginOptions } from '../../types';
 
 
 

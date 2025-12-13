@@ -1,6 +1,6 @@
 import type { CollectionBeforeOperationHook } from 'payload'
 import {parse as parseCookies } from 'cookie'
-import { isTokenExpired } from './isTokenExpired.js'
+import { isTokenExpired } from './isTokenExpired'
 //This code is not used for now.
 export const checkTokenExpiry: CollectionBeforeOperationHook = async ({ req }) => {
     // get token from header

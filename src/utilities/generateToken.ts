@@ -3,8 +3,8 @@ import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
 import type { PluginOptions } from '../types.js'
 import type { UserData } from '../types.js'
-import { getTokenFromRequest } from './getTokenFromRequest.js'
-import { tokenNames } from './tokenNames.js'
+import { getTokenFromRequest } from './getTokenFromRequest'
+import { tokenNames } from './tokenNames'
 
 
 //export const generateRefreshToken = async (req:PayloadRequest,options?:PluginOptions)=>{

@@ -1,9 +1,9 @@
 import type { CollectionAfterLoginHook, CollectionConfig } from 'payload'
 import { v4 as uuidv4 } from 'uuid'
-import type { PluginOptions } from '../types.js'
-import {generateRefreshToken} from '../utilities/generateToken.js'
-import { isRefreshTokenValid } from '../utilities/isRefreshTokenValid.js'
-import {parseRequestBody} from '../utilities/myParsedReqBody.js'
+import type { PluginOptions } from '../types'
+import {generateRefreshToken} from '../utilities/generateToken'
+import { isRefreshTokenValid } from '../utilities/isRefreshTokenValid'
+import {parseRequestBody} from '../utilities/myParsedReqBody'
 
 
 //export const createAfterLogin = (options:PluginOptions):CollectionAfterLoginHook =>{

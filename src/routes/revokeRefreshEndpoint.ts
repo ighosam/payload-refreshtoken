@@ -1,7 +1,7 @@
  import { type Endpoint, type PayloadRequest } from "payload"; 
- import { getTokenFromRequest } from "../utilities/getTokenFromRequest.js"
- import { tokenNames } from "../utilities/tokenNames.js";
- import { deleteRefreshTokenId } from "../utilities/deleteRefreshTokenId.js";
+ import { getTokenFromRequest } from "../utilities/getTokenFromRequest"
+ import { tokenNames } from "../utilities/tokenNames";
+ import { deleteRefreshTokenId } from "../utilities/deleteRefreshTokenId";
   import jwt from 'jsonwebtoken'
 
   export const revokeRefreshEndpoint: Endpoint = {

@@ -1,11 +1,11 @@
 import { type Endpoint, type PayloadRequest } from "payload";
-import { generateAccessToken, generateRefreshToken } from "../utilities/generateToken.js";
-import { getTokenFromRequest } from "../utilities/getTokenFromRequest.js";
-import { isRefreshTokenValid } from "../utilities/isRefreshTokenValid.js";
-import { tokenNames } from "../utilities/tokenNames.js";
+import { generateAccessToken, generateRefreshToken } from "../utilities/generateToken";
+import { getTokenFromRequest } from "../utilities/getTokenFromRequest";
+import { isRefreshTokenValid } from "../utilities/isRefreshTokenValid";
+import { tokenNames } from "../utilities/tokenNames";
 import type {TypedUser} from 'payload'
 import jwt from 'jsonwebtoken'
-import { deleteRefreshTokenId } from "../utilities/deleteRefreshTokenId.js";
+import { deleteRefreshTokenId } from "../utilities/deleteRefreshTokenId";
 
   export const refreshEndpoint: Endpoint = {
     path: "/refresh-token",

@@ -1,8 +1,8 @@
 import { type Endpoint, type PayloadRequest } from "payload";
-import { generateRefreshToken } from '../utilities/generateToken.js';
-import { parseRequestBody } from "../utilities/myParsedReqBody.js";
+import { generateRefreshToken } from '../utilities/generateToken';
+import { parseRequestBody } from "../utilities/myParsedReqBody";
 import jwt from 'jsonwebtoken';
-import { tokenNames } from "../utilities/tokenNames.js";
+import { tokenNames } from "../utilities/tokenNames";
 
 type AuthType = {
     email: string;
