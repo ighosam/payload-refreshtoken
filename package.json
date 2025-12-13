@@ -5,28 +5,20 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf dist && tsc",
     "dev": "tsc --watch"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "@payloadcms/ui": "^3.62.0",
-    "@types/bcrypt": "^6.0.0",
-    "@types/bcryptjs": "^3.0.0",
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
+    "@payloadcms/ui": "^3.68.3",
     "cookie": "^1.0.2",
-    "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "payload": "3.62.0",
     "uuid": "^11.1.0"
   },
+  "peerDependencies": {
+    "payload": "^3.68.3"
+  },
   "devDependencies": {
-    "@types/express": "^5.0.3",
+    "payload": "3.68.3",
     "@types/jsonwebtoken": "^9.0.10"
   }
 }
