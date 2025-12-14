@@ -1,11 +1,6 @@
 import type {PayloadRequest} from 'payload'
 import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
-import type { PluginOptions } from '../types.js'
-import type { UserData } from '../types.js'
-import { getTokenFromRequest } from './getTokenFromRequest'
-import { tokenNames } from './tokenNames'
-
 
 //export const generateRefreshToken = async (req:PayloadRequest,options?:PluginOptions)=>{
 export const generateRefreshToken = async (req:PayloadRequest,sid:string)=>{
@@ -72,7 +67,6 @@ export const generateRefreshToken = async (req:PayloadRequest,sid:string)=>{
 
 }catch(error){
    //if an error occurs return a null.
-   console.log("this is the error that occours: ",error)
     return null
 }
 
@@ -97,7 +91,6 @@ export const generateAccessToken = async (req:PayloadRequest,sid:string)=>{
        
 
     }catch(error){
-        console.log("NOT ABLE TO CREATE ACCESS TOKEN")
 
         return null
        

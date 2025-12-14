@@ -13,7 +13,7 @@
         //get token from request
   const refreshToken = await getTokenFromRequest(req,REFRESHTOKEN) as string
 if(!refreshToken){
- return Response.json({message:'refresh token must be provided'},{status:403}) 
+ return Response.json({message:'refresh token must be provided'},{status:401}) 
 }
 
 
@@ -24,19 +24,19 @@ const {tokenId} = decoded
 
 
    if(!tokenId){
-    return Response.json({message:'Invalid refresh token'},{status:403})
+    return Response.json({message:'Invalid refresh token'},{status:401})
    }
+
    try{
     const deleted = await deleteRefreshTokenId(req.payload,tokenId)
         
     if(deleted != 'success' )
      throw new Error('Revoke refresh token failed')
-      
-return Response.json({message:"Success refresh token revoked"},{status:200})
-   }catch(error){
-    
-   return Response.json({Message: 'Revoke refresh token failed'},{status:405})
+
+   }catch(error){ 
+   return Response.json({Message: 'Revoke refresh token failed'},{status:401})
 
    }
+   return Response.json({message:"Success refresh token revoked"},{status:200})
     }
   }

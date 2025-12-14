@@ -62,7 +62,11 @@ export const loginEndpoint: Endpoint = {
            
             // Return user info and tokens as JSON with cookies set
             return Response.json(
-                { user, token, refreshResault, exp },
+                { user, 
+                [PAYLOADTOKEN]:token, 
+                [REFRESHTOKEN]:refreshResault,
+                exp 
+            },
                 { status: 200, headers }
             );
 
@@ -72,7 +76,7 @@ export const loginEndpoint: Endpoint = {
             // Catch login failures (invalid credentials)
             return Response.json(
                 { error: 'Invalid credentials' },
-                { status: 405 }
+                { status: 401 }
             );
         }
     }

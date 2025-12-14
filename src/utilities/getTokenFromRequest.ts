@@ -28,7 +28,7 @@ export const getTokenFromRequest = async (
       return token;
     } catch (error) {
       if (error instanceof BodyParseError) return undefined;
-      console.warn("Unexpected error parsing body in getTokenFromRequest:", error);
+     // console.warn("Unexpected error parsing body in getTokenFromRequest:", error);
       return undefined;
     }
   };

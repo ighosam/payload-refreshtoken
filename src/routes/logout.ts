@@ -50,8 +50,6 @@ export const logoutEndpoint: Endpoint = {
         return Response.json({ ok: true }, { status: 200 });
       }
 
-       console.log("YOU CALLED LOGOUT AND NOW YOU ARE LOGGED OUT !!!!1")
-
       // Store the user reference for hooks BEFORE clearing anything
       const userForHooks = user;
     
@@ -101,7 +99,6 @@ export const logoutEndpoint: Endpoint = {
           }
         } catch (hookError) {
           // Hooks must never break logout flow
-          console.error("afterLogout hook failed:", hookError);
         }
       }
       
@@ -129,14 +126,12 @@ export const logoutEndpoint: Endpoint = {
         { status: 200, headers }
       );
     } catch (error) {
-      console.error("Logout error:", error);
-
       return new Response(
         JSON.stringify({
           message: "Logout failed",
           error: error instanceof Error ? error.message : String(error),
         }),
-        { status: 500 }
+        { status: 409 }
       );
     }
   },
