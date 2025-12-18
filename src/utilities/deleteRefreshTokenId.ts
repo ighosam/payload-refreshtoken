@@ -15,7 +15,7 @@ try{
 if( !(tokenIdExist.docs.length > 0) ) throw new Error('no file match') 
          
 }catch(error){
-console.log("Delete refresh token id failed maybe no token Id")
+console.log("Delete refresh token id failed: ",error.message)
 return "failed"
 }
  return "success"    

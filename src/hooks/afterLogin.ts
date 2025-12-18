@@ -8,9 +8,9 @@ import {parseRequestBody} from '../utilities/myParsedReqBody'
 
 //export const createAfterLogin = (options:PluginOptions):CollectionAfterLoginHook =>{
 
-  export const afterLogin:CollectionAfterLoginHook = async ({req,user})=>{
+  export const afterLogin:CollectionAfterLoginHook = async ({req,token,user})=>{
 
-  
+  console.log("the test variable is: ",req.context.test)
 
        /* 
         let foundToken:string

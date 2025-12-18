@@ -1,10 +1,9 @@
 // endpoints/logout.ts
-import { type Endpoint } from "payload";
+import { PayloadRequest, TypedUser, type Endpoint } from "payload";
 import { tokenNames } from "../utilities/tokenNames";
 import { getTokenFromRequest } from "../utilities/getTokenFromRequest";
 import jwt from 'jsonwebtoken'
 import { deleteRefreshTokenId } from "../utilities/deleteRefreshTokenId";
-
 
 const {PAYLOADTOKEN,REFRESHTOKEN} = tokenNames()
 export const logoutEndpoint: Endpoint = {
@@ -12,19 +11,24 @@ export const logoutEndpoint: Endpoint = {
   method: "post",
   handler: async (req) => {
 
-    try {
-      const payload = req.payload;
+const payload = req.payload; 
+//================================
+// Get user from request
+//================================== 
+const getUserFromReq = async (req:PayloadRequest) =>{
+      if(req.user != undefined || req.user != null) return req.user      
       //const user = req.user; // getting user this way is not reliable for admin UI
     const refreshToken = await getTokenFromRequest(req,REFRESHTOKEN) as string
-   //if there no refreshToken return, no refresh token to clear
-   // user not possibly logged in
-     if (!refreshToken) {
-        return Response.json({ ok: true }, { status: 200 });
+
+    if (!refreshToken) {
+        return undefined
       }
-
-   const decoded = jwt.verify(refreshToken,payload.secret ) as jwt.JwtPayload
-        const {userId,tokenId} = decoded
-
+       // =========================================================
+      //try catch will catch error from jwt.verify and returned appropriate value
+      // =========================================================
+      try{
+        const decoded = jwt.verify(refreshToken,payload.secret,{ignoreExpiration: true} ) as jwt.JwtPayload
+        const {userId} = decoded
          const findUser = await payload.find({
           collection: 'users',
           where:{
@@ -34,44 +38,29 @@ export const logoutEndpoint: Endpoint = {
           },
           limit:1
          })
+         const userFromToken = findUser.docs[0]
+        if(!userFromToken) throw new Error("No user found")
 
-       const userFromToken = findUser.docs[0]
+         return userFromToken as TypedUser
 
+      }catch(error){
+       
+        return undefined
 
-      //get user from req or from refresh token which ever is defined
-       const user = userFromToken ? userFromToken : req.user
-      
-      // -------------------------------------------------------------------
-      // 1. Prevent multiple logouts and handle missing user
-      // -------------------------------------------------------------------
-      // If no user exists, simply return ok:true (idempotent logout)
-   
-      if (!user) {
-        return Response.json({ ok: true }, { status: 200 });
       }
-
-      // Store the user reference for hooks BEFORE clearing anything
-      const userForHooks = user;
-    
-      // -------------------------------------------------------------------
-      // 3. Prepare and clear relevant cookies
-      // -------------------------------------------------------------------
-      const headers = new Headers({ "Content-Type": "application/json" });
-
-      // Cookie clearing template
-      const cookieFlags =
-        process.env.NODE_ENV === "production"
-          ? "HttpOnly; Path=/; SameSite=Lax; Secure; Max-Age=0"
-          : "HttpOnly; Path=/; SameSite=Lax; Max-Age=0";
-
-      headers.append("Set-Cookie", `${REFRESHTOKEN}=; ${cookieFlags}`);
-      headers.append("Set-Cookie", `${PAYLOADTOKEN}=; ${cookieFlags}`);
-
-      // -------------------------------------------------------------------
-      // 4. Locate afterLogout hooks (Payload v3 requires manual execution)
-      // -------------------------------------------------------------------
+         
+    }  
+//=================================================
+// End of get user from request
+//==================================================
+      
+// -------------------------------------------------------------------
+// 4. Locate afterLogout hooks function (Payload v3 requires manual execution)
+// -------------------------------------------------------------------
+ 
+    const callAfterLogin = async(payload:PayloadRequest['payload'],userForHooks:TypedUser) => {
+       
       let afterLogoutHooks: any[] = [];
-
       // Method 1: Access hooks through payload.collections
       const usersCollection = payload.collections?.users;
       if (usersCollection?.config?.hooks?.afterLogout) {
@@ -88,51 +77,75 @@ export const logoutEndpoint: Endpoint = {
         }
       }
 
-      // -------------------------------------------------------------------
-      // 5. Execute afterLogout hooks safely
-      // -------------------------------------------------------------------
-
       for (const hook of afterLogoutHooks) {
         try {
           if (typeof hook === "function") {
             await hook({ user: userForHooks, req });
           }
         } catch (hookError) {
+
           // Hooks must never break logout flow
         }
-      }
-      
-     // first make sure tokenId exist before deleting to avoid
-     // the code failing
-          const findTokenId_inDb = await payload.find({
-          collection: 'refresh-token',
-          where:{
-            tokenId:{
-              equals:tokenId
-            }
-          },
-          limit:1
-         })
+      }     
+}
+//================================================
+  //End of call afterLogout hook function
+//================================================  
 
-    const tokenIdExist_inDb = findTokenId_inDb.docs.length > 0
-    tokenIdExist_inDb && await deleteRefreshTokenId(req.payload,tokenId)
-//End of protection of delete of tokenId code
-        
+    const user =  await getUserFromReq(req) // this will get user from refresh-token
+   
+    let tokenId:string
+   if(user != undefined || user != null) {
+    //make sure user exist, either as req.user or from refresh-token
+    req.user = user
+
+    const tokenFromDb = await req.payload.find({
+      collection: 'refresh-token',
+      where:{
+        user:{
+          equals: user.id
+        }
+      },
+      limit:1
+    })
+    // Token id from database for the present logged in user
+    tokenId = tokenFromDb.docs[0]?.tokenId as string
+   }  
+
+  //===============================================================
+  // Perform logout and after logout hook
+  //================================================================
+  let logout:string
+  if( tokenId != undefined){  
+   logout = await deleteRefreshTokenId(req.payload,tokenId) //log user out 
+  }
+  //message and status base on if logout was successful or not
+  const loggedOut = logout === "success" ? {message:"Logged out successful",status:200}:
+                    {message:"Still logged out", status:200}
+  // if logout is ok, now call after logout
+  //logout === "success" &&  await callAfterLogin(req.payload,user) // call after logout   
+  await callAfterLogin(req.payload,user) // call after after logout hook regardless
+ req.user = null
+
+       // -------------------------------------------------------------------
+      // 3. Prepare and clear relevant cookies in header to be returned
+     // -------------------------------------------------------------------
+      const headers = new Headers({ "Content-Type": "application/json" });
+      // Cookie clearing template
+      const cookieFlags =
+        process.env.NODE_ENV === "production"
+          ? "HttpOnly; Path=/; SameSite=Lax; Secure; Max-Age=0"
+          : "HttpOnly; Path=/; SameSite=Lax; Max-Age=0";
+
+      headers.append("Set-Cookie", `${REFRESHTOKEN}=; ${cookieFlags}`);
+      headers.append("Set-Cookie", `${PAYLOADTOKEN}=; ${cookieFlags}`);
+
       // -------------------------------------------------------------------
       // 6. Return success response
       // -------------------------------------------------------------------
       return new Response(
-        JSON.stringify({ message: "Logged out successfully" }),
-        { status: 200, headers }
+        JSON.stringify({ message: loggedOut.message,}),
+        { status: loggedOut.status, headers }
       );
-    } catch (error) {
-      return new Response(
-        JSON.stringify({
-          message: "Logout failed",
-          error: error instanceof Error ? error.message : String(error),
-        }),
-        { status: 409 }
-      );
-    }
   },
 };

@@ -22,7 +22,7 @@ export const generateRefreshToken = async (req:PayloadRequest,sid:string)=>{
     const refreshPayload = {
         tokenId:tokenId,
         userId, 
-        collection:"users",
+        collection:"refresh-token",
          sid,
     }
     
