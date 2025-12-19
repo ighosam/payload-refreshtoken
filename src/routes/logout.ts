@@ -2,15 +2,16 @@
 import type { Endpoint } from "payload";
 import { tokenNames } from "../utilities/tokenNames";
 import { deleteRefreshTokenId } from "../utilities/deleteRefreshTokenId";
-import { runAfterLogoutHooks } from "../utilities/runAfterLogout";
 import { getUserFromReq } from "../utilities/getUserFromRequest";
+import { runAuthHooks } from "../utilities/auth/runAuthHooks";
 
 const {PAYLOADTOKEN,REFRESHTOKEN} = tokenNames()
 export const logoutEndpoint: Endpoint = {
   path: "/logout",
   method: "post",
   handler: async (req) => { 
-
+    
+    const collection = req.payload.collections['users'].config
     const user =  await getUserFromReq(req) // this will get user from refresh-token
    
     let tokenId:string
@@ -29,14 +30,15 @@ export const logoutEndpoint: Endpoint = {
     })
     // Token id from database for the present logged in user
     tokenId = tokenFromDb.docs[0]?.tokenId as string
-   }  
+   }   
+  // ====================================================================
+  // if there is a before logout hook to run, run it below before logout
+  //=====================================================================
 
-  //===============================================================
-  // Perform logout and after logout hook
-  //================================================================
-  // if the user have valid refresh tokenId, he is able to get new access token
-  // therefore if there is no valid refresh tokenId the user is not logged in
 
+  //====================
+  // logout starts here
+  //====================
   let logout:string
   if( tokenId != undefined){  
    logout = await deleteRefreshTokenId(req.payload,tokenId) //log user out 
@@ -47,10 +49,19 @@ export const logoutEndpoint: Endpoint = {
   // if logout is ok, now call after logout
   //logout === "success" &&  await callAfterLogin(req.payload,user) // call after logout   
   //await callAfterLogin(req.payload,user) // call after after logout hook regardless
-  await runAfterLogoutHooks({req,collectionSlug:'users'})
-
- req.user = null
-
+  //await runAfterLogoutHooks({req,collectionSlug:'users'})
+    // =====================
+   // run hook after logout
+  // =====================
+  await runAuthHooks(
+    collection.hooks?.afterLogout,
+    {
+      req,
+      context: req.context,
+      collection,
+      user,
+    })
+// =======================
        // -------------------------------------------------------------------
       // 3. Prepare and clear relevant cookies in header to be returned
      // -------------------------------------------------------------------

@@ -6,7 +6,7 @@ import { tokenNames } from "../utilities/tokenNames";
 import type {TypedUser} from 'payload'
 import { refreshTokenIdMatched } from "../utilities/refreshTokenIdMatched";
 import { v4 as uuidv4 } from 'uuid'
-import { runAfterRefreshHooks } from "../utilities/runAfterRefreshHook";
+import { runAuthHooks } from "../utilities/auth/runAuthHooks";
 
 import jwt, {
   TokenExpiredError,
@@ -23,7 +23,7 @@ import jwt, {
       //  Extract refresh token from request (cookie, body, or header)
       const reqRefreshToken = await getTokenFromRequest(req, REFRESHTOKEN);
       const  headers = new Headers();
-
+      const collection = req.payload.collections['users'].config
       
        try{
 
@@ -122,8 +122,20 @@ import jwt, {
                 'set-cookie',
                 `${PAYLOADTOKEN}=${accessToken}; HttpOnly; Path=/; SameSite=Lax; Secure`
             ); 
-        //call after refresh hook
-          await runAfterRefreshHooks({req,token:accessToken,collectionSlug:"users"})
+   
+  //=======================
+  //call after refresh hook
+  //=======================
+   await runAuthHooks<{ token: string }>(
+    collection.hooks?.afterRefresh,
+    {
+      req,
+      context: req.context,
+      collection,
+      token: accessToken,
+    }
+  )
+  //======================================
     
       // 6. Return response
       return Response.json(
