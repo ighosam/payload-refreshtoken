@@ -12,6 +12,7 @@ import InactivityNotice from './componenet/InactivityNotice'
 import {CustomInactivity} from './componenet/CustomInactivity'
 import {CustomLogoutButton} from './componenet/CustomLogoutButton'
 import { revokeRefreshEndpoint } from './routes/revokeRefreshEndpoint'
+import { afterRefresh } from './hooks/afterRefresh'
 
 const InactivityNoticeC  = InactivityNotice  as unknown as CustomComponent
 const CustomInactivityC  = CustomInactivity  as unknown as CustomComponent
@@ -137,6 +138,10 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
                 ...(collection.hooks?.afterLogout || []),
                afterLogout
               ],
+              afterRefresh:[
+                ...(collection.hooks?.afterRefresh || []), 
+               afterRefresh
+    ],      
               beforeLogin:[
                 ...(collection.hooks?.beforeLogin || []),
                

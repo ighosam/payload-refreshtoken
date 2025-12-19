@@ -5,7 +5,8 @@ import { isRefreshTokenValid } from "../utilities/isRefreshTokenValid";
 import { tokenNames } from "../utilities/tokenNames";
 import type {TypedUser} from 'payload'
 import { refreshTokenIdMatched } from "../utilities/refreshTokenIdMatched";
- import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
+import { runAfterRefreshHooks } from "../utilities/runAfterRefreshHook";
 
 import jwt, {
   TokenExpiredError,
@@ -43,7 +44,7 @@ import jwt, {
     //=========================================================
     // Check to make sure that the tokenId from refreshToken matched that of db
          if(tokenId === undefined || !tokenId)
-            throw new Error("Invalid token cannot refresh")
+            throw new Error("Auth refresh failed")
 
          // first make sure that this user is logged in
          // by checking for tokenId in refresh-token collection for this user
@@ -77,7 +78,7 @@ import jwt, {
             }
             }
         })
-          throw new Error("token is compromised, revoked token")
+          throw new Error("refresh failed")
           }
     
 
@@ -121,7 +122,9 @@ import jwt, {
                 'set-cookie',
                 `${PAYLOADTOKEN}=${accessToken}; HttpOnly; Path=/; SameSite=Lax; Secure`
             ); 
-            
+        //call after refresh hook
+          await runAfterRefreshHooks({req,token:accessToken,collectionSlug:"users"})
+    
       // 6. Return response
       return Response.json(
          

@@ -1,8 +1,9 @@
-import type { CollectionAfterLogoutHook } from 'payload';
+import type { CollectionAfterRefreshHook } from 'payload';
 
-const afterLogoutHook: CollectionAfterLogoutHook = async ({
+export const afterRefresh: CollectionAfterRefreshHook = async ({
   req,
 }) => {
    
-  console.log("YEAH YOU LOGGED OUT!!!!!")
+  console.log("YEAH YOU REFRESHED!!!!!")
+  return null
 }
