@@ -27,6 +27,8 @@ import {parseRequestBody} from '../utilities/myParsedReqBody'
             throw new Error("Login error, try agian")
         }    
      */
+
+        console.log("YOU ARE NOW LOGGED IN, THANK YOU")
     
 
   return user 

@@ -1,18 +1,13 @@
 import { type Endpoint, type PayloadRequest } from "payload";
 import { generateAccessToken, generateRefreshToken } from "../utilities/generateToken";
 import { getTokenFromRequest } from "../utilities/getTokenFromRequest";
-import { isRefreshTokenValid } from "../utilities/isRefreshTokenValid";
 import { tokenNames } from "../utilities/tokenNames";
 import type {TypedUser} from 'payload'
 import { refreshTokenIdMatched } from "../utilities/refreshTokenIdMatched";
 import { v4 as uuidv4 } from 'uuid'
 import { runAuthHooks } from "../utilities/auth/runAuthHooks";
 
-import jwt, {
-  TokenExpiredError,
-  JsonWebTokenError,
- // NotBeforeError,
-} from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 
   export const refreshEndpoint: Endpoint = {
     path: "/refresh-token",
@@ -29,13 +24,7 @@ import jwt, {
 
       if (!reqRefreshToken) 
         throw new Error("Refresh token is required")
-     /*   
-      //  Validate refresh token
-      const refreshTokenIsValid = isRefreshTokenValid(req, reqRefreshToken);
      
-      if (!refreshTokenIsValid)
-        throw new Error("Invalid or expired refresh token")
-    */    
       //if we get here it means the refrsh token is valid
       // ====================================================
 
@@ -158,9 +147,10 @@ import jwt, {
         `${PAYLOADTOKEN}=; HttpOnly; Path=/; SameSite=Lax; Secure; Max-Age=0`
         ); 
          
+        console.log("Refresh token failed: ",error.message)
          return Response.json(
-          { error: error.message },
-          { status: 403,headers })
+          { error: "Unauthorized" },
+          { status: 401,headers })
         
        }
 

@@ -13,6 +13,11 @@
         //get token from request
   const refreshToken = await getTokenFromRequest(req,REFRESHTOKEN) as string
   const NewtokenId = uuidv4()
+
+  //only revoke if the user is currently logged in
+  // and the token to be revoked is not expired.
+
+
   
   try{
         if(!refreshToken) throw new Error('refresh token must be provided') 
@@ -35,14 +40,18 @@
                 }
             }
         })
-        
-    if(!updateTokenId)
-     throw new Error('Revoke refresh token failed')
+         // ===============================================================================
+        // No data will exist for this user in refresh-token if this user is not logged in
+        // update will not work.
+        // =================================================================================
+        if(!(updateTokenId.docs.length>0)) throw new Error("This user is not logged in")
 
    }catch(error){ 
-   return Response.json({Message: 'Revoke refresh token failed'},{status:401})
+    console.log("Revoke token failed: ",error.message)
+    //return success response for security reasons.
+    return Response.json({Message: `Success, token revoked`},{status:200})
 
    }
-   return Response.json({message:"Success refresh token revoked"},{status:200})
+   return Response.json({message:"Success, token revoked"},{status:200})
     }
   }

@@ -13,6 +13,7 @@ import {CustomInactivity} from './componenet/CustomInactivity'
 import {CustomLogoutButton} from './componenet/CustomLogoutButton'
 import { revokeRefreshEndpoint } from './routes/revokeRefreshEndpoint'
 import { afterRefresh } from './hooks/afterRefresh'
+import { beforeLogin } from './hooks/beforeLogin'
 
 const InactivityNoticeC  = InactivityNotice  as unknown as CustomComponent
 const CustomInactivityC  = CustomInactivity  as unknown as CustomComponent
@@ -132,8 +133,9 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
             
             hooks: {
               ...(collection.hooks || {}),
-              afterLogin: [...(collection.hooks?.afterLogin || []), afterLogin],
-              
+              afterLogin: [...(collection.hooks?.afterLogin || []),
+               afterLogin
+              ],
               afterLogout: [
                 ...(collection.hooks?.afterLogout || []),
                afterLogout
@@ -144,7 +146,7 @@ export const payloadRefreshToken = (options: PluginOptions): Plugin =>  {
     ],      
               beforeLogin:[
                 ...(collection.hooks?.beforeLogin || []),
-               
+               beforeLogin
               ]
                    
             },
